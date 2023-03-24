@@ -246,7 +246,9 @@ public class Lexer {
 
         if (!strToMatch.equals(buffer.toString())) {
             // Put back what has been read
-            charBuffer.putBack(buffer.toString());
+            if (!buffer.isEmpty()) {
+                charBuffer.putBack(buffer.toString());
+            }
             return null;
         }
 
