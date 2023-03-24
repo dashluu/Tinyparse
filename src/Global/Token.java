@@ -39,4 +39,15 @@ public class Token {
     public String toString() {
         return "Token: " + value + ", Token type: " + type + ", Line number: " + lineNumber;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof Token token)) {
+            return false;
+        }
+        return value.equals(token.getValue()) && type == token.type;
+    }
 }
