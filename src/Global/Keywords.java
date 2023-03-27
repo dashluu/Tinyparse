@@ -1,6 +1,6 @@
 package Global;
 
-public class Config {
+public class Keywords {
     public static String MUTABLE_ID_DECL = "var";
     public static String IMMUTABLE_ID_DECL = "const";
     public static String GLOBAL_SCOPE_ID = "global";

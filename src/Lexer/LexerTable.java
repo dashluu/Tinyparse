@@ -1,6 +1,6 @@
 package Lexer;
 
-import Global.Config;
+import Global.Keywords;
 import Global.TokenType;
 import Symbols.SymbolInfo;
 import Symbols.SymbolTable;
@@ -24,32 +24,25 @@ public class LexerTable {
         if (!init) {
             SymbolTable symbolTable = SymbolTable.getInstance();
             // Initialize the lexer table
-            lexerTable.set(Config.MUTABLE_ID_DECL, symbolTable.getKeyword(TokenType.MUTABLE_ID_DECL.name()));
-            lexerTable.set(Config.IMMUTABLE_ID_DECL, symbolTable.getKeyword(TokenType.IMMUTABLE_ID_DECL.name()));
-            lexerTable.set(Config.BOOL_TRUE, symbolTable.getKeyword(TokenType.BOOL_TRUE.name()));
-            lexerTable.set(Config.BOOL_FALSE, symbolTable.getKeyword(TokenType.BOOL_FALSE.name()));
-            lexerTable.set(Config.INT_TYPE_ID, symbolTable.getType(TokenType.INT_TYPE_ID.name()));
-            lexerTable.set(Config.FLOAT_TYPE_ID, symbolTable.getType(TokenType.FLOAT_TYPE_ID.name()));
-            lexerTable.set(Config.BOOL_TYPE_ID, symbolTable.getType(TokenType.BOOL_TYPE_ID.name()));
-            lexerTable.set(Config.ADD, symbolTable.getOperator(TokenType.ADD.name()));
-            lexerTable.set(Config.SUB, symbolTable.getOperator(TokenType.SUB.name()));
-            lexerTable.set(Config.MULT, symbolTable.getOperator(TokenType.MULT.name()));
-            lexerTable.set(Config.DIV, symbolTable.getOperator(TokenType.DIV.name()));
-            lexerTable.set(Config.MOD, symbolTable.getOperator(TokenType.MOD.name()));
-            lexerTable.set(Config.POW, symbolTable.getOperator(TokenType.POW.name()));
-            lexerTable.set(Config.BITWISE_NOT, symbolTable.getOperator(TokenType.BITWISE_NOT.name()));
-            lexerTable.set(Config.BITWISE_AND, symbolTable.getOperator(TokenType.BITWISE_AND.name()));
-            lexerTable.set(Config.BITWISE_OR, symbolTable.getOperator(TokenType.BITWISE_OR.name()));
-            lexerTable.set(Config.LOGICAL_NOT, symbolTable.getOperator(TokenType.LOGICAL_NOT.name()));
-            lexerTable.set(Config.LOGICAL_AND, symbolTable.getOperator(TokenType.LOGICAL_AND.name()));
-            lexerTable.set(Config.LOGICAL_OR, symbolTable.getOperator(TokenType.LOGICAL_OR.name()));
-            lexerTable.set(Config.DOT, symbolTable.getOperator(TokenType.DOT.name()));
-            lexerTable.set(Config.COLON, symbolTable.getOperator(TokenType.COLON.name()));
-            lexerTable.set(Config.LPAREN, symbolTable.getOperator(TokenType.LPAREN.name()));
-            lexerTable.set(Config.RPAREN, symbolTable.getOperator(TokenType.RPAREN.name()));
-            lexerTable.set(Config.SEMICOLON, symbolTable.getOperator(TokenType.SEMICOLON.name()));
-            lexerTable.set(Config.ASSIGNMENT, symbolTable.getOperator(TokenType.ASSIGNMENT.name()));
-            lexerTable.set(Config.EQ, symbolTable.getOperator(TokenType.EQ.name()));
+            lexerTable.set(Keywords.MUTABLE_ID_DECL, symbolTable.getKeyword(TokenType.MUTABLE_ID_DECL.name()));
+            lexerTable.set(Keywords.IMMUTABLE_ID_DECL, symbolTable.getKeyword(TokenType.IMMUTABLE_ID_DECL.name()));
+            lexerTable.set(Keywords.BOOL_TRUE, symbolTable.getKeyword(TokenType.BOOL_TRUE.name()));
+            lexerTable.set(Keywords.BOOL_FALSE, symbolTable.getKeyword(TokenType.BOOL_FALSE.name()));
+            lexerTable.set(Keywords.INT_TYPE_ID, symbolTable.getType(TokenType.INT_TYPE_ID.name()));
+            lexerTable.set(Keywords.FLOAT_TYPE_ID, symbolTable.getType(TokenType.FLOAT_TYPE_ID.name()));
+            lexerTable.set(Keywords.BOOL_TYPE_ID, symbolTable.getType(TokenType.BOOL_TYPE_ID.name()));
+            lexerTable.set(Keywords.ADD, symbolTable.getOperator(TokenType.ADD.name()));
+            lexerTable.set(Keywords.SUB, symbolTable.getOperator(TokenType.SUB.name()));
+            lexerTable.set(Keywords.MULT, symbolTable.getOperator(TokenType.MULT.name()));
+            lexerTable.set(Keywords.DIV, symbolTable.getOperator(TokenType.DIV.name()));
+            lexerTable.set(Keywords.MOD, symbolTable.getOperator(TokenType.MOD.name()));
+            lexerTable.set(Keywords.POW, symbolTable.getOperator(TokenType.POW.name()));
+            lexerTable.set(Keywords.DOT, symbolTable.getOperator(TokenType.DOT.name()));
+            lexerTable.set(Keywords.COLON, symbolTable.getOperator(TokenType.COLON.name()));
+            lexerTable.set(Keywords.LPAREN, symbolTable.getOperator(TokenType.LPAREN.name()));
+            lexerTable.set(Keywords.RPAREN, symbolTable.getOperator(TokenType.RPAREN.name()));
+            lexerTable.set(Keywords.ASSIGNMENT, symbolTable.getOperator(TokenType.ASSIGNMENT.name()));
+            lexerTable.set(Keywords.SEMICOLON, symbolTable.getOperator(TokenType.SEMICOLON.name()));
 
             init = true;
         }

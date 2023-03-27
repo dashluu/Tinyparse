@@ -1,7 +1,6 @@
 package Symbols;
 
 import Global.TokenType;
-import Global.Config;
 import Global.Block;
 
 import java.util.HashMap;
@@ -29,23 +28,18 @@ public class SymbolTable {
             symbolTable.set(new TypeInfo(TokenType.INT_TYPE_ID, 4));
             symbolTable.set(new TypeInfo(TokenType.FLOAT_TYPE_ID, 4));
             symbolTable.set(new TypeInfo(TokenType.BOOL_TYPE_ID, 1));
-            symbolTable.set(new OperatorInfo(TokenType.ADD, 0, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.SUB, 0, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.MULT, 1, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.DIV, 1, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.MOD, 1, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.BITWISE_NOT, 1, true, OperatorType.UNARY));
-            symbolTable.set(new OperatorInfo(TokenType.BITWISE_AND, 1, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.BITWISE_OR, 1, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.LOGICAL_NOT, 1, true, OperatorType.UNARY));
-            symbolTable.set(new OperatorInfo(TokenType.LOGICAL_AND, 1, true, OperatorType.BINARY));
-            symbolTable.set(new OperatorInfo(TokenType.LOGICAL_OR, 1, true, OperatorType.BINARY));
+            symbolTable.set(new OperatorInfo(TokenType.ADD, 2, true, OperatorType.BINARY));
+            symbolTable.set(new OperatorInfo(TokenType.SUB, 2, true, OperatorType.BINARY));
+            symbolTable.set(new OperatorInfo(TokenType.MULT, 3, true, OperatorType.BINARY));
+            symbolTable.set(new OperatorInfo(TokenType.DIV, 3, true, OperatorType.BINARY));
+            symbolTable.set(new OperatorInfo(TokenType.MOD, 3, true, OperatorType.BINARY));
+            symbolTable.set(new OperatorInfo(TokenType.POW, 4, true, OperatorType.BINARY));
             symbolTable.set(new OperatorInfo(TokenType.DOT, 0, true, OperatorType.BINARY));
             symbolTable.set(new OperatorInfo(TokenType.COLON, 0, true, OperatorType.BINARY));
             symbolTable.set(new OperatorInfo(TokenType.LPAREN, 0, true, OperatorType.NONE));
             symbolTable.set(new OperatorInfo(TokenType.RPAREN, 0, true, OperatorType.NONE));
+            symbolTable.set(new OperatorInfo(TokenType.ASSIGNMENT, 1, false, OperatorType.BINARY));
             symbolTable.set(new OperatorInfo(TokenType.SEMICOLON, 0, false, OperatorType.NONE));
-            symbolTable.set(new OperatorInfo(TokenType.ASSIGNMENT, 0, false, OperatorType.BINARY));
 
             init = true;
         }
