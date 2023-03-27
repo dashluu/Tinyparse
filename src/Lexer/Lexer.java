@@ -32,16 +32,6 @@ public class Lexer {
     }
 
     /**
-     * Checks if lexer has reached the end of the stream.
-     *
-     * @return true if lexer has reached the end of the stream and false otherwise.
-     * @throws IOException if the read operation causes an IO error.
-     */
-    public boolean isEOS() throws IOException {
-        return charBuffer.peek() == EOS;
-    }
-
-    /**
      * Skips the spaces until a non-space character is encountered.
      *
      * @throws IOException if the read operation causes an IO error.
@@ -97,53 +87,88 @@ public class Lexer {
     }
 
     /**
-     * Gets the next token in the stream.
+     * Peeks and removes the next token from the buffer.
      *
-     * @return a token if one exists and null otherwise.
+     * @return the next token in the buffer.
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if the read operation causes an IO error.
      */
-    public Token getNextToken() throws SyntaxError, IOException {
+    public Token readToken() throws SyntaxError, IOException {
+        Token token = peekToken();
+        tokenBuffer.removeFirst();
+        return token;
+    }
+
+    /**
+     * Peeks the next token without removing it from the stream.
+     *
+     * @return the next token in the buffer.
+     * @throws SyntaxError if there is a syntax error.
+     * @throws IOException if the read operation causes an IO error.
+     */
+    public Token peekToken() throws SyntaxError, IOException {
         // Reads from the token buffer before extracting characters from the stream
         if (!tokenBuffer.isEmpty()) {
-            return tokenBuffer.removeFirst();
+            return tokenBuffer.peekFirst();
         }
 
         skipSpaces();
-        if (charBuffer.peek() == EOS) {
-            return null;
+
+        // Check if the token is EOF
+        Token token = getEOFToken();
+        if (token != null) {
+            tokenBuffer.addLast(token);
+            return token;
         }
-
-        Token token = getAlnumUnderscoreToken();
-        SymbolInfo symbol;
-
+        // Check if the token consists of only alphanumerics or underscores
+        token = getAlnumUnderscoreToken();
         if (token != null) {
             String tokenStr = token.getValue();
-            symbol = lexerTable.get(tokenStr);
+            SymbolInfo symbol = lexerTable.get(tokenStr);
             if (symbol == null) {
                 // If the key cannot be found in the lexer table, it is a var
                 token.setType(TokenType.VAR);
+                tokenBuffer.addLast(token);
                 return token;
             }
+            // Check if the token is a keyword, if it is, change its token type
             if (symbol.getSymbolType() == SymbolType.KEYWORD) {
-                // Check if the token is a keyword, if it is, change its token type
                 token.setType(symbol.getTokenType());
+                tokenBuffer.addLast(token);
                 return token;
             }
             // Otherwise, the token must be a data type
             token.setType(symbol.getTokenType());
+            tokenBuffer.addLast(token);
             return token;
         }
+        // Check if the token is a scientific real number
         token = getScientificNumberToken();
         if (token != null) {
+            tokenBuffer.addLast(token);
             return token;
         }
+        // Check if the token is an operator
         token = getOperatorToken();
         if (token != null) {
+            tokenBuffer.addLast(token);
             return token;
         }
         throw new SyntaxError("Unable to get next token because of invalid syntax at '" +
                 (char) charBuffer.peek() + "'", getCurrentLine());
+    }
+
+    /**
+     * Creates a token specifically for end-of-file mark.
+     *
+     * @return a token whose type is EOF.
+     * @throws IOException if the read operation causes an error.
+     */
+    private Token getEOFToken() throws IOException {
+        if (charBuffer.peek() != EOS) {
+            return null;
+        }
+        return new Token(null, TokenType.EOF);
     }
 
     /**

@@ -18,7 +18,7 @@ class LexerTest {
         Lexer lexer = new Lexer(reader);
         Token token;
         ArrayList<Token> actualTokens = new ArrayList<>();
-        while ((token = lexer.getNextToken()) != null) {
+        while ((token = lexer.readToken()) != null && token.getType() != TokenType.EOF) {
             actualTokens.add(token);
         }
         return actualTokens;
