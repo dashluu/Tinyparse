@@ -1,14 +1,13 @@
 package Lexer;
 
-import Global.Keywords;
 import Global.TokenType;
-import Symbols.SymbolInfo;
-import Symbols.SymbolTable;
+import Reserved.ReservedInfo;
+import Reserved.ReservedTable;
 
 import java.util.HashMap;
 
 public class LexerTable {
-    private final HashMap<String, SymbolInfo> strToSymbolMap = new HashMap<>();
+    private final HashMap<String, ReservedInfo> strToReservedMap = new HashMap<>();
     private static final LexerTable lexerTable = new LexerTable();
     private static boolean init = false;
 
@@ -22,27 +21,27 @@ public class LexerTable {
      */
     public static LexerTable getInstance() {
         if (!init) {
-            SymbolTable symbolTable = SymbolTable.getInstance();
+            ReservedTable reservedTable = ReservedTable.getInstance();
             // Initialize the lexer table
-            lexerTable.set(Keywords.MUTABLE_ID_DECL, symbolTable.getKeyword(TokenType.MUTABLE_ID_DECL.name()));
-            lexerTable.set(Keywords.IMMUTABLE_ID_DECL, symbolTable.getKeyword(TokenType.IMMUTABLE_ID_DECL.name()));
-            lexerTable.set(Keywords.BOOL_TRUE, symbolTable.getKeyword(TokenType.BOOL_TRUE.name()));
-            lexerTable.set(Keywords.BOOL_FALSE, symbolTable.getKeyword(TokenType.BOOL_FALSE.name()));
-            lexerTable.set(Keywords.INT_TYPE_ID, symbolTable.getType(TokenType.INT_TYPE_ID.name()));
-            lexerTable.set(Keywords.FLOAT_TYPE_ID, symbolTable.getType(TokenType.FLOAT_TYPE_ID.name()));
-            lexerTable.set(Keywords.BOOL_TYPE_ID, symbolTable.getType(TokenType.BOOL_TYPE_ID.name()));
-            lexerTable.set(Keywords.ADD, symbolTable.getOperator(TokenType.ADD.name()));
-            lexerTable.set(Keywords.SUB, symbolTable.getOperator(TokenType.SUB.name()));
-            lexerTable.set(Keywords.MULT, symbolTable.getOperator(TokenType.MULT.name()));
-            lexerTable.set(Keywords.DIV, symbolTable.getOperator(TokenType.DIV.name()));
-            lexerTable.set(Keywords.MOD, symbolTable.getOperator(TokenType.MOD.name()));
-            lexerTable.set(Keywords.POW, symbolTable.getOperator(TokenType.POW.name()));
-            lexerTable.set(Keywords.DOT, symbolTable.getOperator(TokenType.DOT.name()));
-            lexerTable.set(Keywords.COLON, symbolTable.getOperator(TokenType.COLON.name()));
-            lexerTable.set(Keywords.LPAREN, symbolTable.getOperator(TokenType.LPAREN.name()));
-            lexerTable.set(Keywords.RPAREN, symbolTable.getOperator(TokenType.RPAREN.name()));
-            lexerTable.set(Keywords.ASSIGNMENT, symbolTable.getOperator(TokenType.ASSIGNMENT.name()));
-            lexerTable.set(Keywords.SEMICOLON, symbolTable.getOperator(TokenType.SEMICOLON.name()));
+            lexerTable.set("var", reservedTable.getKeyword(TokenType.MUTABLE_ID_DECL));
+            lexerTable.set("const", reservedTable.getKeyword(TokenType.IMMUTABLE_ID_DECL));
+            lexerTable.set("true", reservedTable.getKeyword(TokenType.BOOL_TRUE));
+            lexerTable.set("false", reservedTable.getKeyword(TokenType.BOOL_FALSE));
+            lexerTable.set("Int", reservedTable.getType(TokenType.INT_TYPE_ID));
+            lexerTable.set("Float", reservedTable.getType(TokenType.FLOAT_TYPE_ID));
+            lexerTable.set("Bool", reservedTable.getType(TokenType.BOOL_TYPE_ID));
+            lexerTable.set("+", reservedTable.getOperator(TokenType.ADD));
+            lexerTable.set("-", reservedTable.getOperator(TokenType.SUB));
+            lexerTable.set("*", reservedTable.getOperator(TokenType.MULT));
+            lexerTable.set("/", reservedTable.getOperator(TokenType.DIV));
+            lexerTable.set("%", reservedTable.getOperator(TokenType.MOD));
+            lexerTable.set("**", reservedTable.getOperator(TokenType.POW));
+            lexerTable.set(".", reservedTable.getOperator(TokenType.DOT));
+            lexerTable.set(":", reservedTable.getOperator(TokenType.COLON));
+            lexerTable.set("(", reservedTable.getOperator(TokenType.LPAREN));
+            lexerTable.set(")", reservedTable.getOperator(TokenType.RPAREN));
+            lexerTable.set("=", reservedTable.getOperator(TokenType.ASSIGNMENT));
+            lexerTable.set(";", reservedTable.getOperator(TokenType.SEMICOLON));
 
             init = true;
         }
@@ -50,24 +49,23 @@ public class LexerTable {
     }
 
     /**
-     * Gets the symbol in the table associated with the given string.
+     * Gets the ReservedInfo object in the table associated with the given string.
      *
      * @param key the input string as the key.
-     * @return the symbol associated with the given key.
+     * @return the ReservedInfo object associated with the given key.
      */
-    public SymbolInfo get(String key) {
-        return strToSymbolMap.get(key);
+    public ReservedInfo get(String key) {
+        return strToReservedMap.get(key);
     }
 
     /**
-     * Inserts a new key-value pair into the table if it does not exist, otherwise, replace the old symbol
+     * Inserts a new key-value pair into the table if it does not exist, otherwise, replaces the old ReservedInfo object
      * with the new one.
      *
-     * @param key    the string as a key.
-     * @param symbol the symbol to be set.
-     * @return the old symbol if one exists and null otherwise.
+     * @param key          the string as a key.
+     * @param reservedInfo the ReservedInfo object to be set.
      */
-    private SymbolInfo set(String key, SymbolInfo symbol) {
-        return strToSymbolMap.put(key, symbol);
+    private void set(String key, ReservedInfo reservedInfo) {
+        strToReservedMap.put(key, reservedInfo);
     }
 }

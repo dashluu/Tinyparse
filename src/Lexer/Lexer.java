@@ -3,8 +3,8 @@ package Lexer;
 import Exceptions.SyntaxError;
 import Global.Token;
 import Global.TokenType;
-import Symbols.SymbolInfo;
-import Symbols.SymbolType;
+import Reserved.ReservedInfo;
+import Reserved.ReservedType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -124,21 +124,21 @@ public class Lexer {
         token = getAlnumUnderscoreToken();
         if (token != null) {
             String tokenStr = token.getValue();
-            SymbolInfo symbol = lexerTable.get(tokenStr);
-            if (symbol == null) {
+            ReservedInfo reservedInfo = lexerTable.get(tokenStr);
+            if (reservedInfo == null) {
                 // If the key cannot be found in the lexer table, it is a var
                 token.setType(TokenType.VAR);
                 tokenBuffer.addLast(token);
                 return token;
             }
             // Check if the token is a keyword, if it is, change its token type
-            if (symbol.getSymbolType() == SymbolType.KEYWORD) {
-                token.setType(symbol.getTokenType());
+            if (reservedInfo.getReservedType() == ReservedType.KEYWORD) {
+                token.setType(reservedInfo.getId());
                 tokenBuffer.addLast(token);
                 return token;
             }
             // Otherwise, the token must be a data type
-            token.setType(symbol.getTokenType());
+            token.setType(reservedInfo.getId());
             tokenBuffer.addLast(token);
             return token;
         }
@@ -217,21 +217,21 @@ public class Lexer {
         int c;
         StringBuilder tokenStr = new StringBuilder();
         String str;
-        SymbolInfo tempSymbol, savedSymbol = null;
+        ReservedInfo tempInfo, savedInfo = null;
         boolean end = false;
 
         while ((c = charBuffer.peek()) != EOS && !end) {
             str = tokenStr.toString() + (char) c;
             // Find the token type corresponding to the string
-            tempSymbol = lexerTable.get(str);
-            end = tempSymbol == null;
+            tempInfo = lexerTable.get(str);
+            end = tempInfo == null;
             if (!end) {
                 // Check if the retrieved token type is an operator
-                end = tempSymbol.getSymbolType() != SymbolType.OPERATOR;
+                end = tempInfo.getReservedType() != ReservedType.OPERATOR;
             }
             if (!end) {
                 tokenStr.append((char) c);
-                savedSymbol = tempSymbol;
+                savedInfo = tempInfo;
                 charBuffer.read();
             }
         }
@@ -240,8 +240,8 @@ public class Lexer {
             return null;
         }
 
-        assert savedSymbol != null;
-        return new Token(tokenStr.toString(), savedSymbol.getTokenType(), currLine);
+        assert savedInfo != null;
+        return new Token(tokenStr.toString(), savedInfo.getId(), currLine);
     }
 
     /**

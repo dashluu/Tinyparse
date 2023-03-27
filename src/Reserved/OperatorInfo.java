@@ -1,16 +1,16 @@
-package Symbols;
+package Reserved;
 
 import Global.TokenType;
 
-public class OperatorInfo extends SymbolInfo {
+public class OperatorInfo extends ReservedInfo {
     // Precedence
     private final int preced;
     private final boolean leftToRight;
     // Operator type: NONE, UNARY, BINARY
     private final OperatorType opType;
 
-    public OperatorInfo(TokenType tokenType, int preced, boolean leftToRight, OperatorType opType) {
-        super(tokenType.name(), tokenType, SymbolType.OPERATOR);
+    public OperatorInfo(TokenType id, int preced, boolean leftToRight, OperatorType opType) {
+        super(id, ReservedType.OPERATOR);
         this.preced = preced;
         this.leftToRight = leftToRight;
         this.opType = opType;
