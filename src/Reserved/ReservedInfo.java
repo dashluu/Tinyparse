@@ -29,9 +29,9 @@ public class ReservedInfo {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ReservedInfo info)) {
+        if (!(obj instanceof ReservedInfo reservedInfo)) {
             return false;
         }
-        return id == info.id;
+        return id == reservedInfo.id;
     }
 }

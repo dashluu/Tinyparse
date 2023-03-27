@@ -217,21 +217,21 @@ public class Lexer {
         int c;
         StringBuilder tokenStr = new StringBuilder();
         String str;
-        ReservedInfo tempInfo, savedInfo = null;
+        ReservedInfo tempReservedInfo, savedReservedInfo = null;
         boolean end = false;
 
         while ((c = charBuffer.peek()) != EOS && !end) {
             str = tokenStr.toString() + (char) c;
             // Find the token type corresponding to the string
-            tempInfo = lexerTable.get(str);
-            end = tempInfo == null;
+            tempReservedInfo = lexerTable.get(str);
+            end = tempReservedInfo == null;
             if (!end) {
                 // Check if the retrieved token type is an operator
-                end = tempInfo.getReservedType() != ReservedType.OPERATOR;
+                end = tempReservedInfo.getReservedType() != ReservedType.OPERATOR;
             }
             if (!end) {
                 tokenStr.append((char) c);
-                savedInfo = tempInfo;
+                savedReservedInfo = tempReservedInfo;
                 charBuffer.read();
             }
         }
@@ -240,8 +240,8 @@ public class Lexer {
             return null;
         }
 
-        assert savedInfo != null;
-        return new Token(tokenStr.toString(), savedInfo.getId(), currLine);
+        assert savedReservedInfo != null;
+        return new Token(tokenStr.toString(), savedReservedInfo.getId(), currLine);
     }
 
     /**
