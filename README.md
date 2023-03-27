@@ -18,9 +18,14 @@ As I learned in my C programming class, there are several phases in the compilat
 For example, Java Virtual Machine(JVM) first compiles Java source code to an assembly-like language called
 bytecodes. JVM's interpreter then executes bytecode instructions to produce some output.
 ## Compilation phases
-* **Lexer (or a tokenizer, aka scanner)**: tokenizes the code and splits it into tokens which is composed of
-a token type, a string value as the token's content, and a line number that the token is on.
-* **Parser**: consumes the tokens and "stitches" them together by following some rules, or
-  grammar. The result produced by parser is an abstract syntax tree(AST).
-## Symbol Table
+* **Lexing (or tokenizing, aka lexical analysis)**: tokenizes the code and splits it into small units called
+tokens which is composed of a type, a string value, and a line number that the token is on.
+* **Parsing**: I divide parsing into two smaller phases.
+  * **Syntax analysis**: consumes the tokens and "stitches" them together by following some rules, or
+    grammar. The result produced by parser is a syntax tree.
+  * **Semantic analysis**: figures out what the code is trying to do. Some things to do in this phase are
+type checking and type conversion.
+## Components
+### Lexer
+
 
