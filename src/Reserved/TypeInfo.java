@@ -1,6 +1,6 @@
 package Reserved;
 
-import Global.TokenType;
+import Tokens.TokenType;
 
 public class TypeInfo extends ReservedInfo {
     private final int size;

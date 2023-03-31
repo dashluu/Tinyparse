@@ -1,6 +1,6 @@
 package Reserved;
 
-import Global.TokenType;
+import Tokens.TokenType;
 
 public class ReservedInfo {
     protected final TokenType id;

@@ -1,6 +1,6 @@
 package Reserved;
 
-import Global.TokenType;
+import Tokens.TokenType;
 
 public class KeywordInfo extends ReservedInfo {
     public KeywordInfo(TokenType id) {

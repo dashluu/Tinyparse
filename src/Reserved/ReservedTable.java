@@ -1,6 +1,6 @@
 package Reserved;
 
-import Global.TokenType;
+import Tokens.TokenType;
 
 import java.util.HashMap;
 
@@ -20,8 +20,8 @@ public class ReservedTable {
     public static ReservedTable getInstance() {
         if (!init) {
             // Initialize the reserved table
-            RESERVED_TABLE.set(new KeywordInfo(TokenType.MUTABLE_ID_DECL));
-            RESERVED_TABLE.set(new KeywordInfo(TokenType.IMMUTABLE_ID_DECL));
+            RESERVED_TABLE.set(new KeywordInfo(TokenType.MUTABLE_VAR_DECL));
+            RESERVED_TABLE.set(new KeywordInfo(TokenType.IMMUTABLE_VAR_DECL));
             RESERVED_TABLE.set(new KeywordInfo(TokenType.BOOL_LITERAL));
             RESERVED_TABLE.set(new KeywordInfo(TokenType.BOOL_LITERAL));
             RESERVED_TABLE.set(new TypeInfo(TokenType.INT_TYPE_ID, 4));
