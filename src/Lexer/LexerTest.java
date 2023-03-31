@@ -1,8 +1,8 @@
 package Lexer;
 
 import Exceptions.SyntaxError;
-import Global.Token;
-import Global.TokenType;
+import Tokens.Token;
+import Tokens.TokenType;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -18,7 +18,7 @@ class LexerTest {
         Lexer lexer = new Lexer(reader);
         Token token;
         ArrayList<Token> actualTokens = new ArrayList<>();
-        while ((token = lexer.readToken()) != null && token.getType() != TokenType.EOF) {
+        while ((token = lexer.readToken()) != null && token.getTokenType() != TokenType.EOF) {
             actualTokens.add(token);
         }
         return actualTokens;
@@ -59,17 +59,17 @@ class LexerTest {
     public void testLexerValid2() {
         String inputStr = "  var b=b +\t-.e+.5 *  a/a  *((2.e-1-67.+71e3*21)))\t";
         ArrayList<Token> expectedTokens = new ArrayList<>();
-        expectedTokens.add(new Token("var", TokenType.MUTABLE_ID_DECL));
-        expectedTokens.add(new Token("b", TokenType.VAR));
+        expectedTokens.add(new Token("var", TokenType.MUTABLE_VAR_DECL));
+        expectedTokens.add(new Token("b", TokenType.ID));
         expectedTokens.add(new Token("=", TokenType.ASSIGNMENT));
-        expectedTokens.add(new Token("b", TokenType.VAR));
+        expectedTokens.add(new Token("b", TokenType.ID));
         expectedTokens.add(new Token("+", TokenType.ADD));
         expectedTokens.add(new Token("-", TokenType.SUB));
         expectedTokens.add(new Token("0.0e+0.5", TokenType.FLOAT_LITERAL));
         expectedTokens.add(new Token("*", TokenType.MULT));
-        expectedTokens.add(new Token("a", TokenType.VAR));
+        expectedTokens.add(new Token("a", TokenType.ID));
         expectedTokens.add(new Token("/", TokenType.DIV));
-        expectedTokens.add(new Token("a", TokenType.VAR));
+        expectedTokens.add(new Token("a", TokenType.ID));
         expectedTokens.add(new Token("*", TokenType.MULT));
         expectedTokens.add(new Token("(", TokenType.LPAREN));
         expectedTokens.add(new Token("(", TokenType.LPAREN));
@@ -89,6 +89,17 @@ class LexerTest {
             assertEquals(expectedTokens, actualTokens);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testLexerInvalid1() {
+        String inputStr = "  w32_=_b +\n-.e+.5 *\n a/72a \t*((8.)))\t";
+        try {
+            extractTokensFromStr(inputStr);
+        } catch (SyntaxError | IOException e) {
+            String expected = "Invalid numeric expression after '72' on line 3";
+            assertEquals(expected, e.getMessage());
         }
     }
 }
