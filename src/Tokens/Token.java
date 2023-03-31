@@ -1,18 +1,18 @@
-package Global;
+package Tokens;
 
 public class Token {
     private final String value;
-    private TokenType type;
+    private TokenType tokenType;
     private final int lineNumber;
 
-    public Token(String value, TokenType type, int lineNumber) {
+    public Token(String value, TokenType tokenType, int lineNumber) {
         this.value = value;
-        this.type = type;
+        this.tokenType = tokenType;
         this.lineNumber = lineNumber;
     }
 
-    public Token(String value, TokenType type) {
-        this(value, type, 1);
+    public Token(String value, TokenType tokenType) {
+        this(value, tokenType, 1);
     }
 
     public Token(String value) {
@@ -23,21 +23,21 @@ public class Token {
         return value;
     }
 
-    public TokenType getType() {
-        return type;
+    public TokenType getTokenType() {
+        return tokenType;
     }
 
     public int getLineNumber() {
         return lineNumber;
     }
 
-    public void setType(TokenType type) {
-        this.type = type;
+    public void setTokenType(TokenType tokenType) {
+        this.tokenType = tokenType;
     }
 
     @Override
     public String toString() {
-        return "Token: " + value + ", Token type: " + type + ", Line number: " + lineNumber;
+        return "Token: " + value + ", Token type: " + tokenType + ", Line number: " + lineNumber;
     }
 
     @Override
@@ -48,6 +48,6 @@ public class Token {
         if (!(obj instanceof Token token)) {
             return false;
         }
-        return value.equals(token.getValue()) && type == token.type;
+        return value.equals(token.getValue()) && tokenType == token.tokenType;
     }
 }
