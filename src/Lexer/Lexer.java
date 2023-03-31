@@ -1,8 +1,8 @@
 package Lexer;
 
 import Exceptions.SyntaxError;
-import Global.Token;
-import Global.TokenType;
+import Tokens.Token;
+import Tokens.TokenType;
 import Reserved.ReservedInfo;
 import Reserved.ReservedType;
 
@@ -126,19 +126,19 @@ public class Lexer {
             String tokenStr = token.getValue();
             ReservedInfo reservedInfo = lexerTable.get(tokenStr);
             if (reservedInfo == null) {
-                // If the key cannot be found in the lexer table, it is a var
-                token.setType(TokenType.VAR);
+                // If the key cannot be found in the lexer table, it is an ID
+                token.setTokenType(TokenType.ID);
                 tokenBuffer.addLast(token);
                 return token;
             }
             // Check if the token is a keyword, if it is, change its token type
             if (reservedInfo.getReservedType() == ReservedType.KEYWORD) {
-                token.setType(reservedInfo.getId());
+                token.setTokenType(reservedInfo.getId());
                 tokenBuffer.addLast(token);
                 return token;
             }
             // Otherwise, the token must be a data type
-            token.setType(reservedInfo.getId());
+            token.setTokenType(reservedInfo.getId());
             tokenBuffer.addLast(token);
             return token;
         }
@@ -269,7 +269,7 @@ public class Lexer {
             }
         }
 
-        if (!strToMatch.equals(buffer.toString())) {
+        if (!strToMatch.contentEquals(buffer)) {
             // Put back what has been read
             if (!buffer.isEmpty()) {
                 charBuffer.putBack(buffer.toString());
@@ -364,7 +364,7 @@ public class Lexer {
 
         int c;
         StringBuilder tokenStr = new StringBuilder();
-        TokenType tokenType = tempToken.getType();
+        TokenType tokenType = tempToken.getTokenType();
 
         tokenStr.append(tempToken.getValue());
         // Get 'e'

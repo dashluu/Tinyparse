@@ -1,6 +1,6 @@
 package Lexer;
 
-import Global.TokenType;
+import Tokens.TokenType;
 import Reserved.ReservedInfo;
 import Reserved.ReservedTable;
 
@@ -23,8 +23,8 @@ public class LexerTable {
         if (!init) {
             ReservedTable reservedTable = ReservedTable.getInstance();
             // Initialize the lexer table
-            lexerTable.set("var", reservedTable.getKeyword(TokenType.MUTABLE_ID_DECL));
-            lexerTable.set("const", reservedTable.getKeyword(TokenType.IMMUTABLE_ID_DECL));
+            lexerTable.set("var", reservedTable.getKeyword(TokenType.MUTABLE_VAR_DECL));
+            lexerTable.set("const", reservedTable.getKeyword(TokenType.IMMUTABLE_VAR_DECL));
             lexerTable.set("true", reservedTable.getKeyword(TokenType.BOOL_TRUE));
             lexerTable.set("false", reservedTable.getKeyword(TokenType.BOOL_FALSE));
             lexerTable.set("Int", reservedTable.getType(TokenType.INT_TYPE_ID));
