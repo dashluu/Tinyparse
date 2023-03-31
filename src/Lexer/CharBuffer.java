@@ -24,6 +24,7 @@ public class CharBuffer {
             buffer.addLast(reader.read());
         }
         // This buffer will never be empty
+        assert !buffer.isEmpty();
         return buffer.peekFirst();
     }
 
