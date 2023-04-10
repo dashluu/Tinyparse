@@ -4,24 +4,19 @@ import Tokens.TokenType;
 
 public class ReservedInfo {
     protected final TokenType id;
-    protected final ReservedType reservedType;
+    protected final ReservedType type;
 
-    public ReservedInfo(TokenType id, ReservedType reservedType) {
+    public ReservedInfo(TokenType id, ReservedType type) {
         this.id = id;
-        this.reservedType = reservedType;
+        this.type = type;
     }
 
     public TokenType getId() {
         return id;
     }
 
-    public ReservedType getReservedType() {
-        return reservedType;
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
+    public ReservedType getType() {
+        return type;
     }
 
     @Override
