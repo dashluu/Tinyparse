@@ -2,17 +2,17 @@ package Tokens;
 
 public class Token {
     private final String value;
-    private TokenType tokenType;
-    private final int lineNumber;
+    private TokenType type;
+    private final int lineNum;
 
-    public Token(String value, TokenType tokenType, int lineNumber) {
+    public Token(String value, TokenType type, int lineNum) {
         this.value = value;
-        this.tokenType = tokenType;
-        this.lineNumber = lineNumber;
+        this.type = type;
+        this.lineNum = lineNum;
     }
 
-    public Token(String value, TokenType tokenType) {
-        this(value, tokenType, 1);
+    public Token(String value, TokenType type) {
+        this(value, type, 1);
     }
 
     public Token(String value) {
@@ -23,21 +23,21 @@ public class Token {
         return value;
     }
 
-    public TokenType getTokenType() {
-        return tokenType;
+    public TokenType getType() {
+        return type;
     }
 
-    public int getLineNumber() {
-        return lineNumber;
+    public int getLineNum() {
+        return lineNum;
     }
 
-    public void setTokenType(TokenType tokenType) {
-        this.tokenType = tokenType;
+    public void setType(TokenType type) {
+        this.type = type;
     }
 
     @Override
     public String toString() {
-        return "Token: " + value + ", Token type: " + tokenType + ", Line number: " + lineNumber;
+        return "Token: " + value + ", Token type: " + type + ", Line number: " + lineNum;
     }
 
     @Override
@@ -48,6 +48,6 @@ public class Token {
         if (!(obj instanceof Token token)) {
             return false;
         }
-        return value.equals(token.getValue()) && tokenType == token.tokenType;
+        return value.equals(token.getValue()) && type == token.type;
     }
 }
