@@ -8,7 +8,7 @@ public class Block {
 
     public Block(Block parent) {
         this.parent = parent;
-        this.symbolTable = parent.symbolTable;
+        this.symbolTable = parent == null ? null : parent.symbolTable;
     }
 
     public SymbolTable getSymbolTable() {
