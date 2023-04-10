@@ -5,95 +5,75 @@ import Tokens.TokenType;
 import java.util.HashMap;
 
 public class ReservedTable {
-    private final HashMap<ReservedInfo, ReservedInfo> reservedMap = new HashMap<>();
-    private static final ReservedTable RESERVED_TABLE = new ReservedTable();
+    private final HashMap<String, TokenType> strTokenTypeMap = new HashMap<>();
+    private final HashMap<TokenType, ReservedInfo> reservedMap = new HashMap<>();
+    private final static ReservedTable INSTANCE = new ReservedTable();
     private static boolean init = false;
 
     private ReservedTable() {
     }
 
     /**
-     * Initializes the only instance of the reserved table if it has not been initialized and then returns it.
+     * Initializes the only instance of ReservedTable if it has not been initialized and then returns it.
      *
      * @return a ReservedTable object.
      */
     public static ReservedTable getInstance() {
         if (!init) {
             // Initialize the reserved table
-            RESERVED_TABLE.set(new KeywordInfo(TokenType.MUTABLE_VAR_DECL));
-            RESERVED_TABLE.set(new KeywordInfo(TokenType.IMMUTABLE_VAR_DECL));
-            RESERVED_TABLE.set(new KeywordInfo(TokenType.BOOL_LITERAL));
-            RESERVED_TABLE.set(new KeywordInfo(TokenType.BOOL_LITERAL));
-            RESERVED_TABLE.set(new TypeInfo(TokenType.INT_TYPE_ID, 4));
-            RESERVED_TABLE.set(new TypeInfo(TokenType.FLOAT_TYPE_ID, 4));
-            RESERVED_TABLE.set(new TypeInfo(TokenType.BOOL_TYPE_ID, 1));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.ADD, 2, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.SUB, 2, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.MULT, 3, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.DIV, 3, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.MOD, 3, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.POW, 4, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.DOT, 0, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.COLON, 0, true, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.LPAREN, 0, true, OperatorType.NONE));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.RPAREN, 0, true, OperatorType.NONE));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.ASSIGNMENT, 1, false, OperatorType.BINARY));
-            RESERVED_TABLE.set(new OperatorInfo(TokenType.SEMICOLON, 0, false, OperatorType.NONE));
+            INSTANCE.register("var", new KeywordInfo(TokenType.MUTABLE_DECL));
+            INSTANCE.register("let", new KeywordInfo(TokenType.IMMUTABLE_DECL));
+            INSTANCE.register("true", new KeywordInfo(TokenType.BOOL_LITERAL));
+            INSTANCE.register("false", new KeywordInfo(TokenType.BOOL_LITERAL));
+            INSTANCE.register("int", new TypeInfo(TokenType.INT_TYPE_ID, 4));
+            INSTANCE.register("float", new TypeInfo(TokenType.FLOAT_TYPE_ID, 4));
+            INSTANCE.register("bool", new TypeInfo(TokenType.BOOL_TYPE_ID, 1));
+            INSTANCE.register("+", new OperatorInfo(TokenType.ADD));
+            INSTANCE.register("-", new OperatorInfo(TokenType.SUB));
+            INSTANCE.register("*", new OperatorInfo(TokenType.MULT));
+            INSTANCE.register("/", new OperatorInfo(TokenType.DIV));
+            INSTANCE.register("%", new OperatorInfo(TokenType.MOD));
+            INSTANCE.register(".", new OperatorInfo(TokenType.DOT));
+            INSTANCE.register(":", new OperatorInfo(TokenType.COLON));
+            INSTANCE.register("=", new OperatorInfo(TokenType.ASSIGNMENT));
+            INSTANCE.register("(", new OperatorInfo(TokenType.LPAREN));
+            INSTANCE.register(")", new OperatorInfo(TokenType.RPAREN));
+            INSTANCE.register(";", new OperatorInfo(TokenType.SEMICOLON));
 
             init = true;
         }
-        return RESERVED_TABLE;
+        return INSTANCE;
     }
 
     /**
-     * Inserts a new ReservedInfo object into the table if it does not exist, otherwise, replaces the old ReservedInfo
-     * object with the new one.
+     * Maps a string to a token type and a token type to a ReservedInfo object.
      *
-     * @param reservedInfo the ReservedInfo object to be set.
+     * @param strKey       the string to be mapped to a token type.
+     * @param reservedInfo the ReservedInfo object to be mapped from a token type.
      */
-    private void set(ReservedInfo reservedInfo) {
-        reservedMap.put(reservedInfo, reservedInfo);
+    private void register(String strKey, ReservedInfo reservedInfo) {
+        TokenType reservedId = reservedInfo.getId();
+        strTokenTypeMap.put(strKey, reservedId);
+        reservedMap.put(reservedId, reservedInfo);
     }
 
     /**
-     * Gets a ReservedInfo object based on the identifier and the type.
+     * Gets the token type associated with the given string.
      *
-     * @param id           the ReservedInfo object's identifier.
-     * @param reservedType the ReservedInfo object's type.
+     * @param strKey the input string.
+     * @return a token type if there is one associated with the given string, otherwise, return null.
+     */
+    public TokenType getTokenType(String strKey) {
+        return strTokenTypeMap.get(strKey);
+    }
+
+    /**
+     * Gets a ReservedInfo object based on the identifier.
+     *
+     * @param reservedId the ReservedInfo object identifier.
      * @return a ReservedInfo object if one exists in the table and null otherwise.
      */
-    private ReservedInfo get(TokenType id, ReservedType reservedType) {
-        ReservedInfo dummy = new ReservedInfo(id, reservedType);
-        return reservedMap.get(dummy);
-    }
-
-    /**
-     * Gets a keyword in the reserved table.
-     *
-     * @param id the keyword identifier.
-     * @return a keyword if one exists and null otherwise.
-     */
-    public KeywordInfo getKeyword(TokenType id) {
-        return (KeywordInfo) get(id, ReservedType.KEYWORD);
-    }
-
-    /**
-     * Gets an operator in the reserved table.
-     *
-     * @param id the operator identifier.
-     * @return an operator if one exists and null otherwise.
-     */
-    public OperatorInfo getOperator(TokenType id) {
-        return (OperatorInfo) get(id, ReservedType.OPERATOR);
-    }
-
-    /**
-     * Gets a type in the reserved table.
-     *
-     * @param id the type identifier.
-     * @return a type if one exists and null otherwise.
-     */
-    public TypeInfo getType(TokenType id) {
-        return (TypeInfo) get(id, ReservedType.TYPE);
+    public ReservedInfo getReservedInfo(TokenType reservedId) {
+        return reservedMap.get(reservedId);
     }
 }
