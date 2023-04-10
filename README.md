@@ -55,31 +55,69 @@ There are several phases in the compilation process:
 
 The code for lexer is put in the package `Lexer` in the repository. It includes:
 
-* **CharBuffer**: the class that has an internal buffer which holds characters read from a stream (usually a file).
-* **Lexer**: the class that has an instance of CharBuffer to extract tokens from the input stream
-  and identifies each token's type. Lexer's two main methods are:
-    * `peekToken`: peeks the next tokens in the stream.
-    * `readToken`: extracts the next tokens from the stream.
-* **LexerTable**: a table that maps each token's value to some reserved words, which includes "true", "false", "+", etc.
+* **CharBuffer**: has an internal buffer which holds characters read from a stream (usually a file).
+* **Lexer**:
+    * Has an instance of CharBuffer to extract tokens from the input stream.
+    * Identifies each token's type using the ReservedTable object.
 
 ### Reserved table
 
 * The code for the reserved table is in the package `Reserved`.
-* It is a handcoded table which maps a token value to some reserved word.
-* There are three types of reserved words: keyword, operator, and data type.
+* It is a handcoded table which maps strings to token types and token types to objects that store reserved data.
+* There are three types of reserved objects: keyword, operator, and data type.
+    * **Keyword**: a reserved word used by the language that does not act as an operator.
+    * **Operator**: '+', '-', '*', '/', '=', '<', '>', etc.
+    * **Data type**: built-in basic types such as integer, floating-point, string, etc.
+
+### Operator table
+
+* The code for the operator table is in the package `Reserved`.
+* Similar to the reserved table, it is also handcoded.
+* It is a collection of tables that store operator properties: one for prefix operators, one for infix operators,
+  one for postfix operators, one for precedences, and one for associativity(not yet implemented).
 
 ### Symbol tables
 
 * The code for symbol tables is in the package `Symbols`.
-* A symbol tables stores relevant information about variables, functions, etc.
+* A symbol table stores relevant information about variables, functions, etc.
 * One symbol table is created for each block, or scope, of code.
 * The symbol tables are chained and accessed as stack-like objects so when a block of code has been processed by the
-  parser, the system frees the most recently symbol table.
+  parser, the system deallocates the most recently symbol table.
 
 ### Parser
 
-For simplicity, our parser uses LL(1), a type of top-down parser with recursive descent strategy and at most one
-lookahead. Next, we need grammar to define the correct syntax for our parser. However, writing our own grammar from
-scratch is extremely difficult and time-consuming. To speed up parser development, I decided to use Microsoft C's
-grammar(see the reference list). From that, I made some changes to make it even simpler since I am not trying to build
-a full compiler!
+For simplicity, our parser is a top-down parser with recursive descent and at most one lookahead. Next, we need grammar
+to define the correct syntax for our parser. However, writing our own grammar from scratch is extremely difficult and
+time-consuming. To speed up parser development, I decided to use some parts of existing languages' grammar (inspired
+mostly by Kotlin and Swift). From that, I made some changes to make it even simpler since I am not trying to build a
+full compiler!
+
+#### Regex notations
+
+I borrowed the following regular expression notations
+from [Kotlin's grammar](https://kotlinlang.org/docs/reference/grammar.html).
+
+* `|`: alternative.
+* `*`: zero or more.
+* `+`: one or more.
+* `?`: zero or more
+
+#### Token grammar
+
+* **ID**: (`_` | (`a`-`z`) | (`A`-`Z`))(`_` | (`a`-`z`) | (`A`-`Z`) | (`0`-`9`))*
+* **Digits**: (`0`-`9`)+
+* **Number**: (`0`-`9`)+ | (`0`-`9`)\*`.`(`0`-`9`)\*
+* **Scientific number**: ((`0`-`9`)+ | (`0`-`9`)\*`.`(`0`-`9`)\*)(`.` `e` (`+` | `-`)?((`0`-`9`)+ | (`0`-`9`)\*`.`(`0`-`9`)\*))?
+
+#### Expression grammar
+
+There are four types of expressions: primary, prefix, infix, and postfix. The following is the grammar for different
+parts of an expression, which terminates once `;` is encountered.
+
+```
+primary-expression:       literal-expression | parenthesized-expression
+parenthesized-expression: '(' expression ')'
+prefix-expression:        prefix-operator* postfix-expression
+postfix-expression:       primary-expression postfix-operator
+infix-expression:         prefix-expression infix-operator infix-expression
+```
