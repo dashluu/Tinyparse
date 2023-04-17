@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 public class Node implements Iterable<Node> {
     private final Token token;
+    private final NodeType type;
     private final ArrayList<Node> children = new ArrayList<>();
 
     @Override
@@ -34,12 +35,17 @@ public class Node implements Iterable<Node> {
         }
     }
 
-    public Node(Token token) {
+    public Node(Token token, NodeType type) {
         this.token = token;
+        this.type = type;
     }
 
     public Token getToken() {
         return token;
+    }
+
+    public NodeType getType() {
+        return type;
     }
 
     public Node getChild(int i) {
@@ -62,6 +68,6 @@ public class Node implements Iterable<Node> {
         if (!(obj instanceof Node node)) {
             return false;
         }
-        return token.equals(node.token);
+        return token.equals(node.token) && type == node.type;
     }
 }
