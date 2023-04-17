@@ -2,14 +2,14 @@ package Parser;
 
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
-import Tokens.Token;
-import Tokens.TokenType;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class ExprParserTest {
@@ -21,70 +21,41 @@ class ExprParserTest {
         return exprParser.parseExpr(scope);
     }
 
-    private boolean recurCheckAST(Node expectedAST, Node actualAST) {
-        // Check if both nodes are null
-        if (expectedAST == null) {
-            return actualAST == null;
-        }
-        // Compare data of the two nodes
-        if (!actualAST.equals(expectedAST)) {
-            return false;
-        }
-        // Compare number of children of the two nodes
-        if (actualAST.countChildren() != expectedAST.countChildren()) {
-            return false;
-        }
-        // Recursively compare children of the two nodes
-        for (int i = 0; i < actualAST.countChildren(); ++i) {
-            if (!recurCheckAST(actualAST.getChild(i), expectedAST.getChild(i))) {
-                return false;
+    private String recurTraverseAST(Node root) {
+        if (root != null) {
+            String value = root.getToken().getValue();
+            switch (root.getType()) {
+                case TERM -> {
+                    return value;
+                }
+                case UNARY -> {
+                    String operand = recurTraverseAST(root.getChild(0));
+                    return "(" + value + operand + ")";
+                }
+                case BINARY -> {
+                    String left = recurTraverseAST(root.getChild(0));
+                    String right = recurTraverseAST(root.getChild(1));
+                    return "(" + left + value + right + ")";
+                }
             }
         }
-        return true;
+        return null;
     }
 
     @Test
-    void testValidExpr1() {
-        String inputStr = "-1 + 2 * 3;";
-
-        // Construct the expected tree
-        Node node1 = new Node(new Token("1", TokenType.INT_LITERAL));
-        Node node2 = new Node(new Token("2", TokenType.INT_LITERAL));
-        Node node3 = new Node(new Token("3", TokenType.INT_LITERAL));
-        Node node4 = new Node(new Token("+", TokenType.ADD));
-        Node node5 = new Node(new Token("*", TokenType.MULT));
-        Node node6 = new Node(new Token("-", TokenType.SUB));
-        node6.addChild(node1);
-        node5.addChild(node2);
-        node5.addChild(node3);
-        node4.addChild(node6);
-        node4.addChild(node5);
-
-        // Check if the parser produces a correct tree
+    void testValidExpr() {
         try {
-            Node actualAST = parseExpr(inputStr);
-            boolean astCheck = recurCheckAST(node4, actualAST);
-            if (!astCheck) {
-                fail();
-            }
-        } catch (SyntaxError | IOException e) {
-            e.printStackTrace();
-            fail();
-        }
-    }
+            BufferedReader reader = new BufferedReader(new FileReader("src/Parser/ExprParserTestCases.txt"));
+            String input, expected, actual;
+            Node root;
 
-    @Test
-    void testEmptyExpr() {
-        String inputStr = ";";
-
-        // Check if the parser produces a correct tree
-        try {
-            Node actualAST = parseExpr(inputStr);
-            boolean astCheck = recurCheckAST(null, actualAST);
-            if (!astCheck) {
-                fail();
+            while ((input = reader.readLine()) != null) {
+                expected = reader.readLine();
+                root = parseExpr(input);
+                actual = recurTraverseAST(root);
+                assertEquals(expected, actual);
             }
-        } catch (SyntaxError | IOException e) {
+        } catch (IOException | SyntaxError e) {
             e.printStackTrace();
             fail();
         }
