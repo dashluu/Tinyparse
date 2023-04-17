@@ -6,13 +6,11 @@ import Reserved.TypeInfo;
 public class SymbolInfo {
     protected final String id;
     protected final SymbolType symbolType;
-    protected final Block scope;
     protected final TypeInfo dataType;
 
-    public SymbolInfo(String id, SymbolType symbolType, Block scope, TypeInfo dataType) {
+    public SymbolInfo(String id, SymbolType symbolType, TypeInfo dataType) {
         this.id = id;
         this.symbolType = symbolType;
-        this.scope = scope;
         this.dataType = dataType;
     }
 
@@ -22,10 +20,6 @@ public class SymbolInfo {
 
     public SymbolType getSymbolType() {
         return symbolType;
-    }
-
-    public Block getScope() {
-        return scope;
     }
 
     public TypeInfo getDataType() {
