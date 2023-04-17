@@ -13,20 +13,20 @@ import java.util.ArrayList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class LexerTest {
-    private ArrayList<Token> extractTokens(String inputStr) throws SyntaxError, IOException {
+    private void extractTokens(String inputStr, ArrayList<Token> actualTokens)
+            throws SyntaxError, IOException {
         BufferedReader reader = new BufferedReader(new StringReader(inputStr));
         Lexer lexer = new Lexer(reader);
         Token token;
-        ArrayList<Token> actualTokens = new ArrayList<>();
         while ((token = lexer.consume()) != null && token.getType() != TokenType.EOF) {
             actualTokens.add(token);
         }
-        return actualTokens;
     }
 
     private void checkTokens(String inputStr, ArrayList<Token> expectedTokens) {
         try {
-            ArrayList<Token> actualTokens = extractTokens(inputStr);
+            ArrayList<Token> actualTokens = new ArrayList<>();
+            extractTokens(inputStr, actualTokens);
             assertEquals(expectedTokens, actualTokens);
         } catch (SyntaxError | IOException e) {
             e.printStackTrace();
@@ -92,11 +92,27 @@ class LexerTest {
     @Test
     public void testInvalidInput1() {
         String inputStr = "\nw32_=_b +-.e+.5 /\n a/72a\t";
+        String expectedException;
+        ArrayList<Token> actualTokens = new ArrayList<>();
+        ArrayList<Token> expectedTokens = new ArrayList<>();
+
         try {
-            extractTokens(inputStr);
+            extractTokens(inputStr, actualTokens);
         } catch (SyntaxError | IOException e) {
-            String expected = "Invalid numeric expression after '72' on line 3";
-            assertEquals(expected, e.getMessage());
+            // Check the tokens that have been read before the exception is thrown
+            expectedTokens.add(new Token("w32_", TokenType.ID));
+            expectedTokens.add(new Token("=", TokenType.ASSIGNMENT));
+            expectedTokens.add(new Token("_b", TokenType.ID));
+            expectedTokens.add(new Token("+", TokenType.ADD));
+            expectedTokens.add(new Token("-", TokenType.SUB));
+            expectedTokens.add(new Token("0.0e+0.5", TokenType.FLOAT_LITERAL));
+            expectedTokens.add(new Token("/", TokenType.DIV));
+            expectedTokens.add(new Token("a", TokenType.ID));
+            expectedTokens.add(new Token("/", TokenType.DIV));
+            assertEquals(expectedTokens, actualTokens);
+            // Check the exception
+            expectedException = "Invalid numeric expression after '72' on line 3";
+            assertEquals(expectedException, e.getMessage());
         }
     }
 }
