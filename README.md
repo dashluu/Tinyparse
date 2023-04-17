@@ -6,15 +6,16 @@ I have always wanted to understand what happens behind the scene every time I ty
 many other programming languages. The only way to do so is to build a small compiler(OK but maybe not from scratch :)).
 The fun of engineering is to construct things and see how far they can take you. That is exactly what this project is
 about. It reflects my journey in learning about compilers. Although my knowledge on the topic is still shallow, I will
-continue to update it, and hopefully, it will inspire others to get started with compilers in the future.
+continue to update it, and any feedback will be much appreciated.
 
 ## References
 
 * My book of
-  choice: [Bible on Compilers(the Dragon Book)](https://www.amazon.com/Compilers-Principles-Techniques-Tools-2nd/dp/0321486811).
-* I also borrowed some ideas and read a lot of code from these resources:
+  choice: [The Dragon Book](https://www.amazon.com/Compilers-Principles-Techniques-Tools-2nd/dp/0321486811).
+* I also borrowed some ideas and read a lot of code from these excellent resources:
     * [DoctorWkt on Github](https://github.com/DoctorWkt/acwj)
     * [Bob Nystrom's blog on Pratt's Parser](https://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/)
+    * [Matklad's Pratt parser implementation in Rust](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html)
 * You cannot write a compiler without looking at some other compilers! So I chose the following list of compilers for
   references(mostly on grammar):
     * [C's grammar](https://learn.microsoft.com/en-us/cpp/c-language/c-language-syntax-summary?view=msvc-170)
@@ -86,9 +87,17 @@ The code for lexer is put in the package `Lexer` in the repository. It includes:
 
 ### Parser
 
-For simplicity, our parser is a top-down parser with recursive descent and at most one lookahead. Next, we need grammar
+#### Introduction and informal definitions
+
+* **Context-free grammar**: fill out details later.
+* **Leftmost derivation**: fill out details later.
+* **Left recursion**: fill out details later.
+
+#### Overview
+
+For simplicity, our parser is a top-down parser with recursive descent and at most one lookahead. We need grammar
 to define the correct syntax for our parser. However, writing our own grammar from scratch is extremely difficult and
-time-consuming. To speed up parser development, I decided to use some parts of existing languages' grammar (inspired
+time-consuming. To speed up the parser development, I decided to use some parts of existing languages' grammar (inspired
 mostly by Kotlin and Swift). From that, I made some changes to make it even simpler since I am not trying to build a
 full compiler!
 
@@ -115,7 +124,7 @@ There are four types of expressions: primary, prefix, infix, and postfix. The fo
 parts of an expression, which terminates once `;` is encountered.
 
 ```
-primary-expression:       literal-expression | parenthesized-expression
+primary-expression:       identifier | literal-expression | parenthesized-expression
 parenthesized-expression: '(' expression ')'
 prefix-expression:        prefix-operator* postfix-expression
 postfix-expression:       primary-expression postfix-operator
