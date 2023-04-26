@@ -1,5 +1,5 @@
 package Parser;
 
 public enum NodeType {
-    TERM, BINARY, UNARY
+    TERMINAL, BINARY, UNARY, TYPE, DECL_ASSIGNMENT
 }
