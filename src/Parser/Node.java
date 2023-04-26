@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Node implements Iterable<Node> {
-    private final Token token;
+    private final Token tok;
     private final NodeType type;
     private final ArrayList<Node> children = new ArrayList<>();
 
@@ -35,13 +35,13 @@ public class Node implements Iterable<Node> {
         }
     }
 
-    public Node(Token token, NodeType type) {
-        this.token = token;
+    public Node(Token tok, NodeType type) {
+        this.tok = tok;
         this.type = type;
     }
 
-    public Token getToken() {
-        return token;
+    public Token getTok() {
+        return tok;
     }
 
     public NodeType getType() {
@@ -68,6 +68,6 @@ public class Node implements Iterable<Node> {
         if (!(obj instanceof Node node)) {
             return false;
         }
-        return token.equals(node.token) && type == node.type;
+        return tok.equals(node.tok) && type == node.type;
     }
 }
