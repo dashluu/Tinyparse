@@ -1,4 +1,4 @@
-package Reserved;
+package Operators;
 
 import Tokens.TokenType;
 
@@ -6,9 +6,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 public class OperatorTable {
-    private final HashSet<TokenType> prefixOps = new HashSet<>();
-    private final HashSet<TokenType> infixOps = new HashSet<>();
-    private final HashSet<TokenType> postfixOps = new HashSet<>();
+    private final HashMap<String, TokenType> opMap = new HashMap<>();
+    private final HashSet<TokenType> prefixSet = new HashSet<>();
+    private final HashSet<TokenType> infixSet = new HashSet<>();
+    private final HashSet<TokenType> postfixSet = new HashSet<>();
     private final HashMap<TokenType, Integer> precedMap = new HashMap<>();
     // Associativity table, true means left-to-right, false means right-to-left
     private final HashMap<TokenType, Boolean> associativityMap = new HashMap<>();
@@ -25,26 +26,39 @@ public class OperatorTable {
      */
     public static OperatorTable getInstance() {
         if (!init) {
-            // Initializes prefix table
-            INSTANCE.prefixOps.add(TokenType.ADD);
-            INSTANCE.prefixOps.add(TokenType.SUB);
+            // Add operators to table
+            INSTANCE.opMap.put("+", TokenType.ADD);
+            INSTANCE.opMap.put("-", TokenType.SUB);
+            INSTANCE.opMap.put("*", TokenType.MULT);
+            INSTANCE.opMap.put("/", TokenType.DIV);
+            INSTANCE.opMap.put("%", TokenType.MOD);
+            INSTANCE.opMap.put(".", TokenType.DOT);
+            INSTANCE.opMap.put(":", TokenType.COLON);
+            INSTANCE.opMap.put("=", TokenType.ASSIGNMENT);
+            INSTANCE.opMap.put("(", TokenType.LPAREN);
+            INSTANCE.opMap.put(")", TokenType.RPAREN);
+            INSTANCE.opMap.put(";", TokenType.SEMICOLON);
 
-            // Initializes infix table
-            INSTANCE.infixOps.add(TokenType.ADD);
-            INSTANCE.infixOps.add(TokenType.SUB);
-            INSTANCE.infixOps.add(TokenType.MULT);
-            INSTANCE.infixOps.add(TokenType.DIV);
-            INSTANCE.infixOps.add(TokenType.MOD);
+            // Initialize prefix table
+            INSTANCE.prefixSet.add(TokenType.ADD);
+            INSTANCE.prefixSet.add(TokenType.SUB);
 
-            // Initializes postfix table
+            // Initialize infix table
+            INSTANCE.infixSet.add(TokenType.ADD);
+            INSTANCE.infixSet.add(TokenType.SUB);
+            INSTANCE.infixSet.add(TokenType.MULT);
+            INSTANCE.infixSet.add(TokenType.DIV);
+            INSTANCE.infixSet.add(TokenType.MOD);
 
-            // Initializes precedence table
+            // Initialize postfix table
+
+            // Initialize precedence table
             INSTANCE.precedMap.put(TokenType.ADD, 10);
             INSTANCE.precedMap.put(TokenType.SUB, 10);
             INSTANCE.precedMap.put(TokenType.MULT, 20);
             INSTANCE.precedMap.put(TokenType.DIV, 20);
 
-            // Initializes associativity table
+            // Initialize associativity table
             INSTANCE.associativityMap.put(TokenType.ADD, true);
             INSTANCE.associativityMap.put(TokenType.SUB, true);
             INSTANCE.associativityMap.put(TokenType.MULT, true);
@@ -56,73 +70,83 @@ public class OperatorTable {
     }
 
     /**
+     * Gets the operator's id associated with the given string.
+     *
+     * @param opStr a string associated with an operator.
+     * @return a TokenType object as the operator's id if it exists, otherwise, return null.
+     */
+    public TokenType getId(String opStr) {
+        return opMap.get(opStr);
+    }
+
+    /**
      * Checks if a token is a prefix operator.
      *
-     * @param opType operator's token type.
+     * @param id operator's id.
      * @return true if the token is a prefix operator and false otherwise.
      */
-    public boolean isPrefix(TokenType opType) {
-        return prefixOps.contains(opType);
+    public boolean isPrefix(TokenType id) {
+        return prefixSet.contains(id);
     }
 
     /**
      * Checks if a token is an infix operator.
      *
-     * @param opType operator's token type.
+     * @param id operator's id.
      * @return true if the token is an infix operator and false otherwise.
      */
-    public boolean isInfix(TokenType opType) {
-        return infixOps.contains(opType);
+    public boolean isInfix(TokenType id) {
+        return infixSet.contains(id);
     }
 
     /**
      * Checks if a token is a postfix operator.
      *
-     * @param opType operator's token type.
+     * @param id operator's id.
      * @return true if the token is a postfix operator and false otherwise.
      */
-    public boolean isPostfix(TokenType opType) {
-        return postfixOps.contains(opType);
+    public boolean isPostfix(TokenType id) {
+        return postfixSet.contains(id);
     }
 
     /**
      * Gets the precedence of the given operator.
      *
-     * @param opType operator's token type.
+     * @param id operator's id.
      * @return an int value representing the operator precedence.
      */
-    public int getPreced(TokenType opType) {
-        Integer preced = precedMap.get(opType);
+    public int getPreced(TokenType id) {
+        Integer preced = precedMap.get(id);
         return preced == null ? -1 : preced;
     }
 
     /**
      * Gets the associativity of the given operator.
      *
-     * @param opType operator's token type.
+     * @param id operator's id.
      * @return true if the operator left-to-right, otherwise, return false.
      */
-    public boolean getAssociativity(TokenType opType) {
-        return associativityMap.get(opType);
+    public boolean getAssociativity(TokenType id) {
+        return associativityMap.get(id);
     }
 
     /**
      * Compares the precedences of two operators.
      *
-     * @param opType1 the first operator's token type.
-     * @param opType2 the second operator's token type.
+     * @param id1 the first operator's id.
+     * @param id2 the second operator's id.
      * @return 1 if the first operator has higher priority, otherwise, return -1.
      */
-    public int cmpPreced(TokenType opType1, TokenType opType2) {
-        int preced1 = getPreced(opType1);
-        int preced2 = getPreced(opType2);
+    public int cmpPreced(TokenType id1, TokenType id2) {
+        int preced1 = getPreced(id1);
+        int preced2 = getPreced(id2);
         if (preced1 != preced2) {
             // If the two precedences are not the same,
             // return 1 if the first operator has higher precedence, otherwise, return -1
             return Integer.compare(preced1, preced2);
         }
         // Get the associativity of the first operator
-        boolean isOp1LToR = getAssociativity(opType1);
+        boolean isOp1LToR = getAssociativity(id1);
         // Return 1 if the first operator is left-to-right, otherwise, return -1
         return isOp1LToR ? 1 : -1;
     }
