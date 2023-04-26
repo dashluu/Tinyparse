@@ -2,23 +2,16 @@ package Parser;
 
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
-import Reserved.OperatorTable;
-import Reserved.ReservedInfo;
-import Reserved.ReservedTable;
-import Reserved.ReservedType;
 import Symbols.SymbolInfo;
 import Tokens.Token;
 import Tokens.TokenType;
 
 import java.io.IOException;
 
-public class ExprParser {
-    private final Lexer lexer;
-    private final ReservedTable reservedTable = ReservedTable.getInstance();
-    private final OperatorTable opTable = OperatorTable.getInstance();
+public class ExprParser extends BaseParser {
 
     public ExprParser(Lexer lexer) {
-        this.lexer = lexer;
+        super(lexer);
     }
 
     // Parse general expressions
@@ -38,37 +31,20 @@ public class ExprParser {
     // Helper and utility methods
 
     /**
-     * Consumes the next token if its type is as expected.
-     *
-     * @param expected the token type to be expected.
-     * @return true if the next token's type is as expected and false otherwise.
-     * @throws SyntaxError if there is a syntax error.
-     * @throws IOException if there is an IO exception.
-     */
-    private boolean parseToken(TokenType expected) throws SyntaxError, IOException {
-        TokenType actual = lexer.lookahead().getType();
-        if (actual != expected) {
-            return false;
-        }
-        lexer.consume();
-        return true;
-    }
-
-    /**
      * Consumes a prefix operator.
      *
      * @return an AST Node if a prefix operator is present and null otherwise.
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePrefixOperator() throws SyntaxError, IOException {
-        Token token = lexer.lookahead();
-        TokenType tokenType = token.getType();
-        if (!opTable.isPrefix(tokenType)) {
+    private Node parsePrefixOp() throws SyntaxError, IOException {
+        Token tok = lexer.lookahead();
+        TokenType tokType = tok.getType();
+        if (!opTable.isPrefix(tokType)) {
             return null;
         }
         lexer.consume();
-        return new Node(token, NodeType.UNARY);
+        return new Node(tok, NodeType.UNARY);
     }
 
     /**
@@ -78,14 +54,14 @@ public class ExprParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePostfixOperator() throws SyntaxError, IOException {
-        Token token = lexer.lookahead();
-        TokenType tokenType = token.getType();
-        if (!opTable.isPostfix(tokenType)) {
+    private Node parsePostfixOp() throws SyntaxError, IOException {
+        Token tok = lexer.lookahead();
+        TokenType tokType = tok.getType();
+        if (!opTable.isPostfix(tokType)) {
             return null;
         }
         lexer.consume();
-        return new Node(token, NodeType.UNARY);
+        return new Node(tok, NodeType.UNARY);
     }
 
     // Primary expressions
@@ -109,7 +85,7 @@ public class ExprParser {
         if (node != null) {
             return node;
         }
-        return parseParenthesizedExpr(scope);
+        return parseParenExpr(scope);
     }
 
     /**
@@ -121,18 +97,18 @@ public class ExprParser {
      * @throws IOException if there is an IO exception.
      */
     private Node parseId(Block scope) throws SyntaxError, IOException {
-        Token token = lexer.lookahead();
-        if (token.getType() != TokenType.ID) {
+        Token tok = lexer.lookahead();
+        if (tok.getType() != TokenType.ID) {
             // If the token is not an ID, return
             return null;
         }
-        String id = token.getValue();
-        SymbolInfo symbolInfo = scope.getSymbolTable().get(id);
+        String id = tok.getValue();
+        SymbolInfo symbolInfo = scope.getSymbolTable().getSymbol(id);
         if (symbolInfo == null) {
             // If the ID is not found(not valid), throw an exception
             throw new SyntaxError("Invalid ID '" + id + "'", lexer.getCurrLine());
         }
-        return new Node(token, NodeType.TERM);
+        return new Node(tok, NodeType.TERMINAL);
     }
 
     /**
@@ -143,15 +119,15 @@ public class ExprParser {
      * @throws IOException if there is an IO exception.
      */
     private Node parseLiteral() throws SyntaxError, IOException {
-        Token token = lexer.lookahead();
-        TokenType tokenType = token.getType();
-        if (tokenType != TokenType.BOOL_LITERAL &&
-                tokenType != TokenType.INT_LITERAL &&
-                tokenType != TokenType.FLOAT_LITERAL) {
+        Token tok = lexer.lookahead();
+        TokenType tokType = tok.getType();
+        if (tokType != TokenType.BOOL_LITERAL &&
+                tokType != TokenType.INT_LITERAL &&
+                tokType != TokenType.FLOAT_LITERAL) {
             return null;
         }
         lexer.consume();
-        return new Node(token, NodeType.TERM);
+        return new Node(tok, NodeType.TERMINAL);
     }
 
     /**
@@ -164,13 +140,13 @@ public class ExprParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseParenthesizedExpr(Block scope) throws SyntaxError, IOException {
-        if (!parseToken(TokenType.LPAREN)) {
+    private Node parseParenExpr(Block scope) throws SyntaxError, IOException {
+        if (parseTok(TokenType.LPAREN) == null) {
             return null;
         }
         lexer.consume();
         Node exprNode = parseExpr(scope);
-        if (!parseToken(TokenType.RPAREN)) {
+        if (parseTok(TokenType.RPAREN) == null) {
             throw new SyntaxError("Missing ')'", lexer.getCurrLine());
         }
         return exprNode;
@@ -189,13 +165,13 @@ public class ExprParser {
      * @throws IOException if there is an IO exception.
      */
     private Node parsePrefixExpr(Block scope) throws SyntaxError, IOException {
-        Node root = parsePrefixOperator();
+        Node root = parsePrefixOp();
 
         // There can be zero or many prefix operators
         Node parentOpNode = root;
         Node childOpNode;
         if (parentOpNode != null) {
-            while ((childOpNode = parsePrefixOperator()) != null) {
+            while ((childOpNode = parsePrefixOp()) != null) {
                 parentOpNode.addChild(childOpNode);
                 parentOpNode = childOpNode;
             }
@@ -234,7 +210,7 @@ public class ExprParser {
         if (primaryExprNode == null) {
             return null;
         }
-        Node postfixOpNode = parsePostfixOperator();
+        Node postfixOpNode = parsePostfixOp();
         if (postfixOpNode == null) {
             return primaryExprNode;
         }
@@ -272,38 +248,34 @@ public class ExprParser {
             throws SyntaxError, IOException {
         // First, fetch the left operand
         Node currLeft = parsePrefixExpr(scope);
-        Token opToken;
+        Token opTok;
         TokenType opType;
         Node right, newLeft;
-        ReservedInfo reservedInfo;
 
         while (true) {
-            opToken = lexer.lookahead();
-            opType = opToken.getType();
-            if (opType == TokenType.EOF) {
-                throw new SyntaxError("Missing delimiter after the expression", lexer.getCurrLine());
-            }
+            opTok = lexer.lookahead();
+            opType = opTok.getType();
+            // Check if the next token is ';'
             if (opType == TokenType.SEMICOLON) {
                 if (prevLeft == null || currLeft != null) {
                     // Deal with the cases: ; or operand;
                     return currLeft;
                 } else {
-                    throw new SyntaxError("Expected an operand after '" + prevLeft.getToken().getValue() + "'",
+                    // Throw an exception for the case operand operator ;
+                    throw new SyntaxError("Expected an operand after '" + prevLeft.getTok().getValue() + "'",
                             lexer.getCurrLine());
                 }
             }
-            // Check if the next token is an operator
-            reservedInfo = reservedTable.getReservedInfo(opType);
-            if (reservedInfo == null || reservedInfo.getType() != ReservedType.OPERATOR || !opTable.isInfix(opType)) {
-                // If it is neither an infix operator nor ';', throw an exception
-                throw new SyntaxError("Expected an infix operator or ';' after '" + currLeft.getToken().getValue() + "'",
+            // Check if the next token is an infix operator
+            if (opTable.getId(opTok.getValue()) == null || !opTable.isInfix(opType)) {
+                throw new SyntaxError("Expected an infix operator or ';' after '" + currLeft.getTok().getValue() + "'",
                         lexer.getCurrLine());
             }
             if (prevOpType != TokenType.UNKNOWN && opTable.cmpPreced(opType, prevOpType) < 0) {
                 return currLeft;
             }
             lexer.consume();
-            newLeft = new Node(opToken, NodeType.BINARY);
+            newLeft = new Node(opTok, NodeType.BINARY);
             right = recurParseInfixExpr(scope, newLeft, opType);
             newLeft.addChild(currLeft);
             newLeft.addChild(right);
