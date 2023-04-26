@@ -59,23 +59,26 @@ The code for lexer is put in the package `Lexer` in the repository. It includes:
 * **CharBuffer**: has an internal buffer which holds characters read from a stream (usually a file).
 * **Lexer**:
     * Has an instance of CharBuffer to extract tokens from the input stream.
-    * Identifies each token's type using the ReservedTable object.
+    * Identifies each token's type using the three types of tables below.
 
-### Reserved table
+### Keyword table
 
-* The code for the reserved table is in the package `Reserved`.
-* It is a handcoded table which maps strings to token types and token types to objects that store reserved data.
-* There are three types of reserved objects: keyword, operator, and data type.
-    * **Keyword**: a reserved word used by the language that does not act as an operator.
-    * **Operator**: '+', '-', '*', '/', '=', '<', '>', etc.
-    * **Data type**: built-in basic types such as integer, floating-point, string, etc.
+* The code for the keyword table is in the package `Keywords`.
+* The table is handcoded so values are predetermined.
+* It stores all keywords that have been reserved for the language.
 
 ### Operator table
 
-* The code for the operator table is in the package `Reserved`.
-* Similar to the reserved table, it is also handcoded.
-* It is a collection of tables that store operator properties: one for prefix operators, one for infix operators,
-  one for postfix operators, one for precedences, and one for associativity(not yet implemented).
+* The code for the operator table is in the package `Operators`.
+* Similar to the keyword table, it is also handcoded.
+* It is a collection of tables that store operators and their properties: one for prefix operators, one for infix 
+operators, one for postfix operators, one for precedences, and one for associativities.
+
+### Type table
+
+* The code for the type table is in the package `Types`.
+* Like other tables, it is handcoded.
+* It stores all built-in data types and their sizes.
 
 ### Symbol tables
 
@@ -124,9 +127,20 @@ There are four types of expressions: primary, prefix, infix, and postfix. The fo
 parts of an expression, which terminates once `;` is encountered.
 
 ```
-primary-expression:       identifier | literal-expression | parenthesized-expression
-parenthesized-expression: '(' expression ')'
-prefix-expression:        prefix-operator* postfix-expression
-postfix-expression:       primary-expression postfix-operator
-infix-expression:         prefix-expression infix-operator infix-expression
+expression -> infix-expression
+primary-expression -> identifier | literal-expression | parenthesized-expression
+parenthesized-expression -> '(' expression ')'
+prefix-expression -> prefix-operator* postfix-expression
+postfix-expression -> primary-expression postfix-operator
+infix-expression -> prefix-expression infix-operator infix-expression
+```
+
+#### Declaration grammar
+
+```
+declaration -> variable-declaration
+variable-declaration -> variable-declaration-head variable-name type-annotation initializer
+variable-declaration-head -> 'var'
+type-annotation -> ':' type
+initializer -> '=' expression
 ```
