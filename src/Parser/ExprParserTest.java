@@ -23,9 +23,9 @@ class ExprParserTest {
 
     private String recurTraverseAST(Node root) {
         if (root != null) {
-            String value = root.getToken().getValue();
+            String value = root.getTok().getValue();
             switch (root.getType()) {
-                case TERM -> {
+                case TERMINAL -> {
                     return value;
                 }
                 case UNARY -> {
