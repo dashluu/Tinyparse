@@ -15,26 +15,26 @@ public class SymbolTable {
     }
 
     /**
-     * Inserts a new symbol into the table if it does not exist, otherwise, replaces the old symbol with the new one.
+     * Adds a new symbol to the table.
      *
-     * @param symbolInfo the symbol to be set.
+     * @param symbol the symbol to be registered.
      * @return the old symbol.
      */
-    public SymbolInfo set(SymbolInfo symbolInfo) {
-        return symbolMap.put(symbolInfo.getId(), symbolInfo);
+    public SymbolInfo register(SymbolInfo symbol) {
+        return symbolMap.put(symbol.getId(), symbol);
     }
 
     /**
      * Finds the symbol associated with the given key by moving up the chain of symbol tables.
      *
-     * @param key the string that identifies a symbol in the table.
+     * @param id the string that identifies a symbol in the table.
      * @return a symbol if one exists and null otherwise.
      */
-    public SymbolInfo get(String key) {
+    public SymbolInfo getSymbol(String id) {
         SymbolTable table = this;
         SymbolInfo symbolInfo = null;
         while (table != null && symbolInfo == null) {
-            symbolInfo = table.symbolMap.get(key);
+            symbolInfo = table.symbolMap.get(id);
             table = table.parent;
         }
         return symbolInfo;
