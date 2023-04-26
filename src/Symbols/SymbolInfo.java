@@ -1,7 +1,6 @@
 package Symbols;
 
-import Parser.Block;
-import Reserved.TypeInfo;
+import Types.TypeInfo;
 
 public class SymbolInfo {
     protected final String id;
@@ -31,9 +30,9 @@ public class SymbolInfo {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof SymbolInfo symbolInfo)) {
+        if (!(obj instanceof SymbolInfo symbol)) {
             return false;
         }
-        return id.equals(symbolInfo.id);
+        return id.equals(symbol.id);
     }
 }
