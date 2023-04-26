@@ -1,6 +1,6 @@
 package Symbols;
 
-import Reserved.TypeInfo;
+import Types.TypeInfo;
 
 public class VarInfo extends SymbolInfo {
     private final boolean mutable;
