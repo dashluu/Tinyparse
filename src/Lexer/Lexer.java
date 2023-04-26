@@ -1,26 +1,28 @@
 package Lexer;
 
 import Exceptions.SyntaxError;
-import Reserved.ReservedTable;
+import Keywords.KeywordTable;
+import Operators.OperatorTable;
 import Tokens.Token;
 import Tokens.TokenType;
-import Reserved.ReservedInfo;
-import Reserved.ReservedType;
+import Types.TypeTable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayDeque;
 
 public class Lexer {
-    private final CharBuffer charBuffer;
-    private final ArrayDeque<Token> tokenBuffer = new ArrayDeque<>();
-    private final ReservedTable reservedTable = ReservedTable.getInstance();
+    private final CharBuffer charBuff;
+    private final ArrayDeque<Token> tokBuff = new ArrayDeque<>();
+    private final OperatorTable opTable = OperatorTable.getInstance();
+    private final KeywordTable kwTable = KeywordTable.getInstance();
+    private final TypeTable typeTable = TypeTable.getInstance();
     private final static String SPECIAL_CHARS = "()+-*/%~!&|<>=,.;:_";
     private final static int EOS = -1;
     private int currLine = 1;
 
     public Lexer(BufferedReader reader) {
-        this.charBuffer = new CharBuffer(reader);
+        this.charBuff = new CharBuffer(reader);
     }
 
     /**
@@ -39,11 +41,11 @@ public class Lexer {
      */
     private void skipSpaces() throws IOException {
         int c;
-        while ((c = charBuffer.peek()) != EOS && isSpace(c)) {
+        while ((c = charBuff.peek()) != EOS && isSpace(c)) {
             if (c == '\n') {
                 ++currLine;
             }
-            charBuffer.read();
+            charBuff.read();
         }
     }
 
@@ -83,7 +85,7 @@ public class Lexer {
      * @param c the character to be checked.
      * @return true if the character is a valid separator and false otherwise.
      */
-    private boolean isSeparator(int c) {
+    private boolean isSep(int c) {
         return c == EOS || isSpace(c) || c == ';';
     }
 
@@ -95,9 +97,9 @@ public class Lexer {
      * @throws IOException if the read operation causes an IO error.
      */
     public Token consume() throws SyntaxError, IOException {
-        Token token = lookahead();
-        tokenBuffer.removeFirst();
-        return token;
+        Token tok = lookahead();
+        tokBuff.removeFirst();
+        return tok;
     }
 
     /**
@@ -109,55 +111,54 @@ public class Lexer {
      */
     public Token lookahead() throws SyntaxError, IOException {
         // Reads from the token buffer before extracting characters from the stream
-        if (!tokenBuffer.isEmpty()) {
-            return tokenBuffer.peekFirst();
+        if (!tokBuff.isEmpty()) {
+            return tokBuff.peekFirst();
         }
 
         skipSpaces();
 
         // Check if the token is EOF
-        Token token = getEOF();
-        if (token != null) {
-            tokenBuffer.addLast(token);
-            return token;
+        Token tok = getEOF();
+        if (tok != null) {
+            tokBuff.addLast(tok);
+            return tok;
         }
         // Check if the token consists of only alphanumerics or underscores
-        token = getAlnumUnderscore();
-        if (token != null) {
-            String tokenStr = token.getValue();
-            TokenType tokenType = reservedTable.getTokenType(tokenStr);
-            if (tokenType == null) {
-                // If the key cannot be found in the lexer table, it is an ID
-                token.setType(TokenType.ID);
-                tokenBuffer.addLast(token);
-                return token;
-            }
+        tok = getAlnumUnderscore();
+        if (tok != null) {
+            String tokStr = tok.getValue();
             // Check if the token is a keyword, if it is, change its token type
-            ReservedInfo reservedInfo = reservedTable.getReservedInfo(tokenType);
-            if (reservedInfo.getType() == ReservedType.KEYWORD) {
-                token.setType(tokenType);
-                tokenBuffer.addLast(token);
-                return token;
+            TokenType tokType = kwTable.getId(tokStr);
+            if (tokType != null) {
+                tok.setType(tokType);
+                tokBuff.addLast(tok);
+                return tok;
             }
-            // Otherwise, the token must be a data type
-            token.setType(tokenType);
-            tokenBuffer.addLast(token);
-            return token;
+            // Check if the token is a data type, if it is, change its token type
+            if (typeTable.getType(tokStr) != null) {
+                tok.setType(TokenType.TYPE_ID);
+                tokBuff.addLast(tok);
+                return tok;
+            }
+            // Otherwise, the token must be an ID
+            tok.setType(TokenType.ID);
+            tokBuff.addLast(tok);
+            return tok;
         }
         // Check if the token is a scientific real number
-        token = getScientificNumber();
-        if (token != null) {
-            tokenBuffer.addLast(token);
-            return token;
+        tok = getScientificNum();
+        if (tok != null) {
+            tokBuff.addLast(tok);
+            return tok;
         }
         // Check if the token is an operator
-        token = getOperator();
-        if (token != null) {
-            tokenBuffer.addLast(token);
-            return token;
+        tok = getOp();
+        if (tok != null) {
+            tokBuff.addLast(tok);
+            return tok;
         }
         throw new SyntaxError("Unable to get next token because of invalid syntax at '" +
-                (char) charBuffer.peek() + "'", getCurrLine());
+                (char) charBuff.peek() + "'", getCurrLine());
     }
 
     /**
@@ -167,7 +168,7 @@ public class Lexer {
      * @throws IOException if the read operation causes an error.
      */
     private Token getEOF() throws IOException {
-        if (charBuffer.peek() != EOS) {
+        if (charBuff.peek() != EOS) {
             return null;
         }
         return new Token(null, TokenType.EOF);
@@ -185,28 +186,28 @@ public class Lexer {
         int c;
 
         // Check if the first character is end of stream or a letter or '_'
-        if ((c = charBuffer.peek()) == EOS || (!Character.isAlphabetic(c) && c != '_')) {
+        if ((c = charBuff.peek()) == EOS || (!Character.isAlphabetic(c) && c != '_')) {
             return null;
         }
 
-        StringBuilder tokenStr = new StringBuilder();
+        StringBuilder tokStr = new StringBuilder();
         boolean end = false;
 
         // Consume the character from the stream until it is a separator or a valid special character
-        while (!isSeparator(c) && !end) {
+        while (!isSep(c) && !end) {
             if (isAlnumUnderscore(c)) {
-                tokenStr.append((char) c);
-                charBuffer.read();
+                tokStr.append((char) c);
+                charBuff.read();
             } else if (isSpecialChar(c)) {
                 end = true;
             } else {
-                throw new SyntaxError("Invalid character '" + c + "' after '" + tokenStr + "'", getCurrLine());
+                throw new SyntaxError("Invalid character '" + c + "' after '" + tokStr + "'", getCurrLine());
             }
-            c = charBuffer.peek();
+            c = charBuff.peek();
         }
 
         // The string cannot be empty
-        return new Token(tokenStr.toString(), TokenType.UNKNOWN, currLine);
+        return new Token(tokStr.toString(), TokenType.UNKNOWN, currLine);
     }
 
     /**
@@ -216,33 +217,28 @@ public class Lexer {
      * @return a token that stores the operator.
      * @throws IOException if the read operation causes an error.
      */
-    private Token getOperator() throws IOException {
+    private Token getOp() throws IOException {
         int c;
-        StringBuilder tokenStr = new StringBuilder();
-        String str;
-        TokenType tempTokenType, savedTokenType = TokenType.UNKNOWN;
+        StringBuilder tokStr = new StringBuilder();
+        String tmpStr;
+        TokenType tmpTokType, opId = TokenType.UNKNOWN;
         boolean end = false;
 
-        while ((c = charBuffer.peek()) != EOS && !end) {
-            str = tokenStr.toString() + (char) c;
+        while ((c = charBuff.peek()) != EOS && !end) {
+            tmpStr = tokStr.toString() + (char) c;
             // Find the token type corresponding to the string
-            tempTokenType = reservedTable.getTokenType(str);
-            end = tempTokenType == null;
+            tmpTokType = opTable.getId(tmpStr);
+            end = tmpTokType == null;
             if (!end) {
-                // Check if the retrieved token type is an operator
-                ReservedInfo reservedInfo = reservedTable.getReservedInfo(tempTokenType);
-                end = reservedInfo.getType() != ReservedType.OPERATOR;
-            }
-            if (!end) {
-                tokenStr.append((char) c);
-                savedTokenType = tempTokenType;
-                charBuffer.read();
+                tokStr.append((char) c);
+                opId = tmpTokType;
+                charBuff.read();
             }
         }
-        if (tokenStr.isEmpty()) {
+        if (tokStr.isEmpty()) {
             return null;
         }
-        return new Token(tokenStr.toString(), savedTokenType, currLine);
+        return new Token(tokStr.toString(), opId, currLine);
     }
 
     /**
@@ -250,35 +246,34 @@ public class Lexer {
      * that has been read back to the buffer.
      *
      * @param strToMatch the string to match.
-     * @param tokenType  the type of the token to assign if one is present.
+     * @param tokType    the type of the token to assign if one is present.
      * @return a token containing the string if the operation succeeds and null otherwise.
      * @throws IOException if there is an error while reading.
      */
-    private Token getStrToken(String strToMatch, TokenType tokenType)
-            throws IOException {
+    private Token getStrTok(String strToMatch, TokenType tokType) throws IOException {
         int c;
         int i = 0;
         boolean end = false;
         StringBuilder buffer = new StringBuilder();
 
-        while (i < strToMatch.length() && (c = charBuffer.peek()) != EOS && !end) {
+        while (i < strToMatch.length() && (c = charBuff.peek()) != EOS && !end) {
             end = (char) c != strToMatch.charAt(i);
             if (!end) {
                 buffer.append((char) c);
                 ++i;
-                charBuffer.read();
+                charBuff.read();
             }
         }
 
         if (!strToMatch.contentEquals(buffer)) {
             // Put back what has been read
             if (!buffer.isEmpty()) {
-                charBuffer.putBack(buffer.toString());
+                charBuff.putBack(buffer.toString());
             }
             return null;
         }
 
-        return new Token(strToMatch, tokenType, currLine);
+        return new Token(strToMatch, tokType, currLine);
     }
 
     /**
@@ -291,18 +286,18 @@ public class Lexer {
      */
     private Token getDigits() throws IOException {
         int c;
-        StringBuilder tokenStr = new StringBuilder();
+        StringBuilder tokStr = new StringBuilder();
 
-        while ((c = charBuffer.peek()) != EOS && Character.isDigit(c)) {
-            tokenStr.append((char) c);
-            charBuffer.read();
+        while ((c = charBuff.peek()) != EOS && Character.isDigit(c)) {
+            tokStr.append((char) c);
+            charBuff.read();
         }
 
-        if (tokenStr.isEmpty()) {
+        if (tokStr.isEmpty()) {
             return null;
         }
 
-        return new Token(tokenStr.toString(), TokenType.INT_LITERAL, currLine);
+        return new Token(tokStr.toString(), TokenType.INT_LITERAL, currLine);
     }
 
     /**
@@ -312,41 +307,41 @@ public class Lexer {
      * @return a token containing the floating-point number.
      * @throws IOException if the read operation causes an error.
      */
-    private Token getNumber() throws IOException {
-        StringBuilder tokenStr = new StringBuilder();
+    private Token getNum() throws IOException {
+        StringBuilder tokStr = new StringBuilder();
 
         // Reads the integer part
-        Token intToken = getDigits();
-        boolean missingInt = intToken == null;
+        Token intTok = getDigits();
+        boolean missingInt = intTok == null;
         if (missingInt) {
-            tokenStr.append("0");
+            tokStr.append("0");
         } else {
-            tokenStr.append(intToken.getValue());
+            tokStr.append(intTok.getValue());
         }
 
         // Reads '.'
-        Token decPointToken = getStrToken(".", TokenType.UNKNOWN);
-        boolean missingDecPoint = decPointToken == null;
-        if (!missingDecPoint) {
-            tokenStr.append(".");
+        Token decPtTok = getStrTok(".", TokenType.UNKNOWN);
+        boolean missingDecPt = decPtTok == null;
+        if (!missingDecPt) {
+            tokStr.append(".");
         }
 
-        if (missingInt && missingDecPoint) {
+        if (missingInt && missingDecPt) {
             return null;
         }
 
         // Reads the fraction part if there is a decimal point
-        if (!missingDecPoint) {
-            Token fractionToken = getDigits();
-            if (fractionToken == null) {
-                tokenStr.append("0");
+        if (!missingDecPt) {
+            Token fracTok = getDigits();
+            if (fracTok == null) {
+                tokStr.append("0");
             } else {
-                tokenStr.append(fractionToken.getValue());
+                tokStr.append(fracTok.getValue());
             }
         }
 
-        TokenType tokenType = missingDecPoint ? TokenType.INT_LITERAL : TokenType.FLOAT_LITERAL;
-        return new Token(tokenStr.toString(), tokenType, currLine);
+        TokenType tokType = missingDecPt ? TokenType.INT_LITERAL : TokenType.FLOAT_LITERAL;
+        return new Token(tokStr.toString(), tokType, currLine);
     }
 
     /**
@@ -357,49 +352,49 @@ public class Lexer {
      * @throws SyntaxError if the numeric expression is invalid.
      * @throws IOException if the read operation causes an error.
      */
-    private Token getScientificNumber() throws IOException, SyntaxError {
+    private Token getScientificNum() throws IOException, SyntaxError {
         skipSpaces();
 
         // Get a floating-point number
-        Token tempToken = getNumber();
-        if (tempToken == null) {
+        Token tmpTok = getNum();
+        if (tmpTok == null) {
             return null;
         }
 
         int c;
-        StringBuilder tokenStr = new StringBuilder();
-        TokenType tokenType = tempToken.getType();
+        StringBuilder tokStr = new StringBuilder();
+        TokenType tokType = tmpTok.getType();
 
-        tokenStr.append(tempToken.getValue());
+        tokStr.append(tmpTok.getValue());
         // Get 'e'
-        tempToken = getStrToken("e", TokenType.UNKNOWN);
-        if (tempToken == null) {
-            if ((c = charBuffer.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
-                return new Token(tokenStr.toString(), tokenType, currLine);
+        tmpTok = getStrTok("e", TokenType.UNKNOWN);
+        if (tmpTok == null) {
+            if ((c = charBuff.peek()) == EOS || isSpace(c) || isSpecialChar(c) && c != '.') {
+                return new Token(tokStr.toString(), tokType, currLine);
             } else {
-                throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
+                throw new SyntaxError("Invalid numeric expression after '" + tokStr + "'", getCurrLine());
             }
         }
-        tokenStr.append("e");
+        tokStr.append("e");
 
         // Get +/-
-        tempToken = getStrToken("+", TokenType.UNKNOWN);
-        if (tempToken == null) {
+        tmpTok = getStrTok("+", TokenType.UNKNOWN);
+        if (tmpTok == null) {
             // Reads '-' if '+' is not present
-            tempToken = getStrToken("-", TokenType.UNKNOWN);
-            if (tempToken != null) {
-                tokenStr.append(tempToken.getValue());
+            tmpTok = getStrTok("-", TokenType.UNKNOWN);
+            if (tmpTok != null) {
+                tokStr.append(tmpTok.getValue());
             }
         } else {
-            tokenStr.append(tempToken.getValue());
+            tokStr.append(tmpTok.getValue());
         }
 
         // Get the exponent
-        tempToken = getNumber();
-        if (tempToken == null) {
-            throw new SyntaxError("Invalid numeric expression after '" + tokenStr + "'", getCurrLine());
+        tmpTok = getNum();
+        if (tmpTok == null) {
+            throw new SyntaxError("Invalid numeric expression after '" + tokStr + "'", getCurrLine());
         }
-        tokenStr.append(tempToken.getValue());
-        return new Token(tokenStr.toString(), TokenType.FLOAT_LITERAL, currLine);
+        tokStr.append(tmpTok.getValue());
+        return new Token(tokStr.toString(), TokenType.FLOAT_LITERAL, currLine);
     }
 }
