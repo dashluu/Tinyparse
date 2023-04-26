@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 
 public class CharBuffer {
-    private final ArrayDeque<Integer> buffer = new ArrayDeque<>();
+    private final ArrayDeque<Integer> buff = new ArrayDeque<>();
     private final BufferedReader reader;
 
     public CharBuffer(BufferedReader reader) {
@@ -20,12 +20,12 @@ public class CharBuffer {
      * @throws IOException if there is an error while reading from the stream.
      */
     public int peek() throws IOException {
-        if (buffer.isEmpty()) {
-            buffer.addLast(reader.read());
+        if (buff.isEmpty()) {
+            buff.addLast(reader.read());
         }
         // This buffer will never be empty
-        assert !buffer.isEmpty();
-        return buffer.peekFirst();
+        assert !buff.isEmpty();
+        return buff.peekFirst();
     }
 
     /**
@@ -36,7 +36,7 @@ public class CharBuffer {
      */
     public int read() throws IOException {
         int c = peek();
-        buffer.pop();
+        buff.pop();
         return c;
     }
 
@@ -53,7 +53,7 @@ public class CharBuffer {
             throw new IllegalArgumentException("Empty string cannot be put back into the lexer buffer");
         }
         for (int i = str.length() - 1; i >= 0; --i) {
-            buffer.addFirst((int) str.charAt(i));
+            buff.addFirst((int) str.charAt(i));
         }
     }
 }
