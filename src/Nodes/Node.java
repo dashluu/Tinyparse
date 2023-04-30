@@ -1,4 +1,4 @@
-package Parser;
+package Nodes;
 
 import Tokens.Token;
 
@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public class Node implements Iterable<Node> {
-    private final Token tok;
-    private final NodeType type;
-    private final ArrayList<Node> children = new ArrayList<>();
+    protected final Token tok;
+    protected final NodeType type;
+    protected final ArrayList<Node> children = new ArrayList<>();
 
     @Override
     public Iterator<Node> iterator() {
@@ -60,14 +60,7 @@ public class Node implements Iterable<Node> {
         return children.size();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == this) {
-            return true;
-        }
-        if (!(obj instanceof Node node)) {
-            return false;
-        }
-        return tok.equals(node.tok) && type == node.type;
+    public String toJson() {
+        return "\"Node type\": \"" + type + "\"";
     }
 }
