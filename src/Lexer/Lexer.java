@@ -118,13 +118,11 @@ public class Lexer {
         skipSpaces();
 
         // Check if the token is EOF
-        Token tok = getEOF();
-        if (tok != null) {
-            tokBuff.addLast(tok);
-            return tok;
+        if (charBuff.peek() == EOS) {
+            return new Token(null, TokenType.EOF);
         }
         // Check if the token consists of only alphanumerics or underscores
-        tok = getAlnumUnderscore();
+        Token tok = getAlnumUnderscore();
         if (tok != null) {
             String tokStr = tok.getValue();
             // Check if the token is a keyword, if it is, change its token type
@@ -159,19 +157,6 @@ public class Lexer {
         }
         throw new SyntaxError("Unable to get next token because of invalid syntax at '" +
                 (char) charBuff.peek() + "'", getCurrLine());
-    }
-
-    /**
-     * Creates a token specifically for end-of-file mark.
-     *
-     * @return a token whose type is EOF.
-     * @throws IOException if the read operation causes an error.
-     */
-    private Token getEOF() throws IOException {
-        if (charBuff.peek() != EOS) {
-            return null;
-        }
-        return new Token(null, TokenType.EOF);
     }
 
     /**
