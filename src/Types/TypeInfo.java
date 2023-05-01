@@ -16,4 +16,15 @@ public class TypeInfo {
     public int getSize() {
         return size;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof TypeInfo typeInfo)) {
+            return false;
+        }
+        return id.equals(typeInfo.id);
+    }
 }
