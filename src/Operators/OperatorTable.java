@@ -49,6 +49,7 @@ public class OperatorTable {
             INSTANCE.infixSet.add(TokenType.MULT);
             INSTANCE.infixSet.add(TokenType.DIV);
             INSTANCE.infixSet.add(TokenType.MOD);
+            INSTANCE.infixSet.add(TokenType.ASSIGNMENT);
 
             // Initialize postfix table
 
@@ -57,12 +58,14 @@ public class OperatorTable {
             INSTANCE.precedMap.put(TokenType.SUB, 10);
             INSTANCE.precedMap.put(TokenType.MULT, 20);
             INSTANCE.precedMap.put(TokenType.DIV, 20);
+            INSTANCE.precedMap.put(TokenType.ASSIGNMENT, 5);
 
             // Initialize associativity table
             INSTANCE.associativityMap.put(TokenType.ADD, true);
             INSTANCE.associativityMap.put(TokenType.SUB, true);
             INSTANCE.associativityMap.put(TokenType.MULT, true);
             INSTANCE.associativityMap.put(TokenType.DIV, true);
+            INSTANCE.associativityMap.put(TokenType.ASSIGNMENT, false);
 
             init = true;
         }
