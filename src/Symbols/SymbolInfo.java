@@ -2,7 +2,7 @@ package Symbols;
 
 import Types.TypeInfo;
 
-public class SymbolInfo {
+public abstract class SymbolInfo {
     protected final String id;
     protected final SymbolType symbolType;
     protected final TypeInfo dataType;

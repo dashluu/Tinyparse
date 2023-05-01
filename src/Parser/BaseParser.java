@@ -9,7 +9,7 @@ import Types.TypeTable;
 
 import java.io.IOException;
 
-public class BaseParser {
+public abstract class BaseParser {
     protected final Lexer lexer;
     protected final OperatorTable opTable = OperatorTable.getInstance();
     protected final TypeTable typeTable = TypeTable.getInstance();
