@@ -1,6 +1,8 @@
 package Operators;
 
 import Tokens.TokenType;
+import Types.TypeInfo;
+import Types.TypeTable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +15,7 @@ public class OperatorTable {
     private final HashMap<TokenType, Integer> precedMap = new HashMap<>();
     // Associativity table, true means left-to-right, false means right-to-left
     private final HashMap<TokenType, Boolean> associativityMap = new HashMap<>();
+    private final HashSet<OperatorCompat> compatSet = new HashSet<>();
     private final static OperatorTable INSTANCE = new OperatorTable();
     private static boolean init = false;
 
@@ -66,6 +69,33 @@ public class OperatorTable {
             INSTANCE.associativityMap.put(TokenType.MULT, true);
             INSTANCE.associativityMap.put(TokenType.DIV, true);
             INSTANCE.associativityMap.put(TokenType.ASSIGNMENT, false);
+
+            // Initialize operator type compatibility table
+            TypeTable typeTable = TypeTable.getInstance();
+            TypeInfo intType = typeTable.getType(TokenType.INT_LITERAL);
+            TypeInfo floatType = typeTable.getType(TokenType.FLOAT_LITERAL);
+            // Unary operators
+            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.ADD, intType, intType));
+            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.ADD, floatType, floatType));
+            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.SUB, intType, intType));
+            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.SUB, floatType, floatType));
+            // Binary operators
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, intType, intType, intType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, intType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, floatType, intType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, floatType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, intType, intType, intType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, intType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, floatType, intType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, floatType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, intType, intType, intType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, intType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, floatType, intType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, floatType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, intType, intType, intType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, intType, floatType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, floatType, intType, floatType));
+            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, floatType, floatType, floatType));
 
             init = true;
         }
