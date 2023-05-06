@@ -2,7 +2,9 @@ package Parser;
 
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
+import Nodes.BinaryNode;
 import Nodes.Node;
+import Nodes.UnaryNode;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
@@ -28,13 +30,15 @@ class ExprParserTest {
                 case TERMINAL -> {
                     return "(" + value + ")";
                 }
-                case UNARY -> {
-                    String operand = recurTraverseAST(root.getChild(0));
+                case UNARY_OP -> {
+                    UnaryNode unaryRoot = (UnaryNode) root;
+                    String operand = recurTraverseAST(unaryRoot.getChild());
                     return "(" + value + operand + ")";
                 }
-                case BINARY -> {
-                    String left = recurTraverseAST(root.getChild(0));
-                    String right = recurTraverseAST(root.getChild(1));
+                case BINARY_OP -> {
+                    BinaryNode binaryRoot = (BinaryNode) root;
+                    String left = recurTraverseAST(binaryRoot.getLeft());
+                    String right = recurTraverseAST(binaryRoot.getRight());
                     return "(" + left + value + right + ")";
                 }
             }
