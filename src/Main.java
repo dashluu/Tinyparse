@@ -1,6 +1,5 @@
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
-import Nodes.JsonTraversal;
 import Nodes.Node;
 import Parser.Block;
 import Parser.DeclParser;
@@ -21,7 +20,6 @@ public class Main {
             DeclParser declParser = new DeclParser(lexer, exprParser);
             StatementParser stmParser = new StatementParser(declParser);
             Block globalScope = new Block(null);
-            JsonTraversal traversal = new JsonTraversal();
             Token tok;
             Node node;
             String jsonStr;
@@ -29,7 +27,7 @@ public class Main {
             while ((tok = lexer.lookahead()) != null && tok.getType() != TokenType.EOF) {
                 node = stmParser.parseStatement(globalScope);
                 if (node != null) {
-                    jsonStr = traversal.traverse(node);
+                    jsonStr = "{\n" + node.toJson() + "\n}";
                     writer.write(jsonStr);
                 }
             }
