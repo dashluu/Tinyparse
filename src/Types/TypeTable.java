@@ -23,7 +23,7 @@ public class TypeTable {
             // Add types to table
             INSTANCE.register(TokenType.INT_LITERAL, new TypeInfo("int", 4));
             INSTANCE.register(TokenType.FLOAT_LITERAL, new TypeInfo("float", 4));
-            INSTANCE.register(TokenType.BOOL_LITERAL, new TypeInfo("bool", 4));
+            INSTANCE.register(TokenType.BOOL_LITERAL, new TypeInfo("bool", 1));
 
             init = true;
         }
