@@ -5,7 +5,7 @@ import Types.TypeInfo;
 public abstract class SymbolInfo {
     protected final String id;
     protected final SymbolType symbolType;
-    protected final TypeInfo dataType;
+    protected TypeInfo dataType;
 
     public SymbolInfo(String id, SymbolType symbolType, TypeInfo dataType) {
         this.id = id;
@@ -23,6 +23,10 @@ public abstract class SymbolInfo {
 
     public TypeInfo getDataType() {
         return dataType;
+    }
+
+    public void setDataType(TypeInfo dataType) {
+        this.dataType = dataType;
     }
 
     @Override
