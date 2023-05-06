@@ -2,10 +2,7 @@ package Parser;
 
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
-import Nodes.DataTypeNode;
-import Nodes.Node;
-import Nodes.NodeType;
-import Nodes.VarNode;
+import Nodes.*;
 import Symbols.SymbolTable;
 import Symbols.VarInfo;
 import Tokens.Token;
@@ -130,14 +127,14 @@ public class DeclParser extends BaseParser {
             return lhs;
         }
         // Parse an expression using expression parser
-        Node exprNode = exprParser.parseExpr(scope);
+        DataTypeNode exprNode = exprParser.parseExpr(scope);
         if (exprNode == null) {
             throw new SyntaxError("Expected a nonempty expression after '='", lexer.getCurrLine());
         }
         // Construct a new tree whose root is '='
-        Node assignmentNode = new Node(assignmentToken, NodeType.ASSIGNMENT);
-        assignmentNode.addChild(lhs);
-        assignmentNode.addChild(exprNode);
+        BinaryNode assignmentNode = new BinaryNode(assignmentToken, NodeType.ASSIGNMENT, null);
+        assignmentNode.setLeft(lhs);
+        assignmentNode.setRight(exprNode);
         return assignmentNode;
     }
 }

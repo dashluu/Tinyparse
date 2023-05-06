@@ -2,10 +2,7 @@ package Parser;
 
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
-import Nodes.DataTypeNode;
-import Nodes.Node;
-import Nodes.NodeType;
-import Nodes.VarNode;
+import Nodes.*;
 import Symbols.VarInfo;
 import Tokens.Token;
 import Tokens.TokenType;
@@ -29,8 +26,8 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    public Node parseExpr(Block scope) throws SyntaxError, IOException {
-        Node root = parseExpr(scope, false);
+    public DataTypeNode parseExpr(Block scope) throws SyntaxError, IOException {
+        DataTypeNode root = parseExpr(scope, false);
         // Consume ';'
         parseTok(TokenType.SEMICOLON);
         return root;
@@ -45,7 +42,7 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseExpr(Block scope, boolean inParen) throws SyntaxError, IOException {
+    private DataTypeNode parseExpr(Block scope, boolean inParen) throws SyntaxError, IOException {
         return parseInfixExpr(scope, inParen);
     }
 
@@ -58,14 +55,14 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePrefixOp() throws SyntaxError, IOException {
+    private UnaryNode parsePrefixOp() throws SyntaxError, IOException {
         Token tok = lexer.lookahead();
         TokenType tokType = tok.getType();
         if (!opTable.isPrefix(tokType)) {
             return null;
         }
         lexer.consume();
-        return new DataTypeNode(tok, NodeType.UNARY);
+        return new UnaryNode(tok, NodeType.UNARY_OP, null);
     }
 
     /**
@@ -75,14 +72,14 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePostfixOp() throws SyntaxError, IOException {
+    private UnaryNode parsePostfixOp() throws SyntaxError, IOException {
         Token tok = lexer.lookahead();
         TokenType tokType = tok.getType();
         if (!opTable.isPostfix(tokType)) {
             return null;
         }
         lexer.consume();
-        return new DataTypeNode(tok, NodeType.UNARY);
+        return new UnaryNode(tok, NodeType.UNARY_OP, null);
     }
 
     // Primary expressions
@@ -97,8 +94,8 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePrimaryExpr(Block scope) throws SyntaxError, IOException {
-        Node node = parseId(scope);
+    private DataTypeNode parsePrimaryExpr(Block scope) throws SyntaxError, IOException {
+        DataTypeNode node = parseId(scope);
         if (node != null) {
             return node;
         }
@@ -117,7 +114,7 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseId(Block scope) throws SyntaxError, IOException {
+    private DataTypeNode parseId(Block scope) throws SyntaxError, IOException {
         Token tok = lexer.lookahead();
         if (tok.getType() != TokenType.ID) {
             // If the token is not an ID, return
@@ -142,7 +139,7 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseLiteral() throws SyntaxError, IOException {
+    private DataTypeNode parseLiteral() throws SyntaxError, IOException {
         Token tok = lexer.lookahead();
         TokenType tokType = tok.getType();
         // Try mapping a literal to its data type
@@ -164,11 +161,11 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseParenExpr(Block scope) throws SyntaxError, IOException {
+    private DataTypeNode parseParenExpr(Block scope) throws SyntaxError, IOException {
         if (parseTok(TokenType.LPAREN) == null) {
             return null;
         }
-        Node exprNode = parseExpr(scope, true);
+        DataTypeNode exprNode = parseExpr(scope, true);
         if (parseTok(TokenType.RPAREN) == null) {
             throw new SyntaxError("Missing ')'", lexer.getCurrLine());
         }
@@ -187,20 +184,20 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePrefixExpr(Block scope) throws SyntaxError, IOException {
-        Node root = parsePrefixOp();
+    private DataTypeNode parsePrefixExpr(Block scope) throws SyntaxError, IOException {
+        UnaryNode root = parsePrefixOp();
 
         // There can be zero or many prefix operators
-        Node parentOpNode = root;
-        Node childOpNode;
+        UnaryNode parentOpNode = root;
+        UnaryNode childOpNode;
         if (parentOpNode != null) {
             while ((childOpNode = parsePrefixOp()) != null) {
-                parentOpNode.addChild(childOpNode);
+                parentOpNode.setChild(childOpNode);
                 parentOpNode = childOpNode;
             }
         }
 
-        Node postfixExprNode = parsePostfixExpr(scope);
+        DataTypeNode postfixExprNode = parsePostfixExpr(scope);
         if (parentOpNode == null) {
             // If there are no prefix operators, the root of the tree is the postfix expression
             // Note that the postfix expression does or does not exist
@@ -212,7 +209,7 @@ public class ExprParser extends BaseParser {
             throw new SyntaxError("Expected an expression following the prefix operator",
                     lexer.getCurrLine());
         }
-        parentOpNode.addChild(postfixExprNode);
+        parentOpNode.setChild(postfixExprNode);
         return root;
     }
 
@@ -228,16 +225,16 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parsePostfixExpr(Block scope) throws SyntaxError, IOException {
-        Node primaryExprNode = parsePrimaryExpr(scope);
+    private DataTypeNode parsePostfixExpr(Block scope) throws SyntaxError, IOException {
+        DataTypeNode primaryExprNode = parsePrimaryExpr(scope);
         if (primaryExprNode == null) {
             return null;
         }
-        Node postfixOpNode = parsePostfixOp();
+        UnaryNode postfixOpNode = parsePostfixOp();
         if (postfixOpNode == null) {
             return primaryExprNode;
         }
-        postfixOpNode.addChild(primaryExprNode);
+        postfixOpNode.setChild(primaryExprNode);
         return postfixOpNode;
     }
 
@@ -254,7 +251,7 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseInfixExpr(Block scope, boolean inParen) throws SyntaxError, IOException {
+    private DataTypeNode parseInfixExpr(Block scope, boolean inParen) throws SyntaxError, IOException {
         return recurParseInfixExpr(scope, null, inParen);
     }
 
@@ -268,13 +265,14 @@ public class ExprParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node recurParseInfixExpr(Block scope, Node prevOp, boolean inParen)
+    private DataTypeNode recurParseInfixExpr(Block scope, Node prevOp, boolean inParen)
             throws SyntaxError, IOException {
         // First, fetch the left operand
-        Node currLeft = parsePrefixExpr(scope);
+        DataTypeNode currLeft = parsePrefixExpr(scope);
         Token opTok;
         TokenType opType;
-        Node right, newLeft;
+        DataTypeNode right;
+        BinaryNode newLeft;
 
         while (true) {
             opTok = lexer.lookahead();
@@ -347,10 +345,10 @@ public class ExprParser extends BaseParser {
             }
 
             lexer.consume();
-            newLeft = new DataTypeNode(opTok, NodeType.BINARY);
+            newLeft = new BinaryNode(opTok, NodeType.BINARY_OP, null);
             right = recurParseInfixExpr(scope, newLeft, inParen);
-            newLeft.addChild(currLeft);
-            newLeft.addChild(right);
+            newLeft.setLeft(currLeft);
+            newLeft.setRight(right);
             currLeft = newLeft;
         }
     }
