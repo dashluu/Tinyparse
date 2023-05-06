@@ -2,7 +2,6 @@ package Parser;
 
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
-import Nodes.JsonTraversal;
 import Nodes.Node;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +24,7 @@ class DeclParserTest {
     private void checkValidDecl(String input, String expected) {
         try {
             Node root = parseDecl(input);
-            JsonTraversal jsonTraversal = new JsonTraversal();
-            String actual = jsonTraversal.traverse(root);
+            String actual = "{\n" + root.toJson() + "\n}";
             assertEquals(expected, actual);
         } catch (IOException | SyntaxError e) {
             e.printStackTrace();
@@ -44,12 +42,8 @@ class DeclParserTest {
                         "Data type": "int",
                         "Size": 4,
                         "Mutable": "true",
-                        "Id": "a",
-                        "Children": [
-                        
-                        ]
-                        }
-                        """;
+                        "Id": "a"
+                        }""";
         checkValidDecl(input, expected);
     }
 }
