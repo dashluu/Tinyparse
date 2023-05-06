@@ -15,7 +15,10 @@ public class OperatorTable {
     private final HashMap<TokenType, Integer> precedMap = new HashMap<>();
     // Associativity table, true means left-to-right, false means right-to-left
     private final HashMap<TokenType, Boolean> associativityMap = new HashMap<>();
-    private final HashSet<OperatorCompat> compatSet = new HashSet<>();
+    // This table stores the data type compatibility for each operator
+    // When an operator is applied, it is used to check if the operands' data types are compatible
+    // If they are, it finds the data type of the result after applying the operator
+    private final HashMap<OperatorCompat, TypeInfo> compatMap = new HashMap<>();
     private final static OperatorTable INSTANCE = new OperatorTable();
     private static boolean init = false;
 
@@ -75,27 +78,27 @@ public class OperatorTable {
             TypeInfo intType = typeTable.getType(TokenType.INT_LITERAL);
             TypeInfo floatType = typeTable.getType(TokenType.FLOAT_LITERAL);
             // Unary operators
-            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.ADD, intType, intType));
-            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.ADD, floatType, floatType));
-            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.SUB, intType, intType));
-            INSTANCE.compatSet.add(new UnaryOperatorCompat(TokenType.SUB, floatType, floatType));
+            INSTANCE.registerCompat(new UnaryOperatorCompat(TokenType.ADD, intType), intType);
+            INSTANCE.registerCompat(new UnaryOperatorCompat(TokenType.ADD, floatType), floatType);
+            INSTANCE.registerCompat(new UnaryOperatorCompat(TokenType.SUB, intType), intType);
+            INSTANCE.registerCompat(new UnaryOperatorCompat(TokenType.SUB, floatType), floatType);
             // Binary operators
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, intType, intType, intType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, intType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, floatType, intType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.ADD, floatType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, intType, intType, intType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, intType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, floatType, intType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.SUB, floatType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, intType, intType, intType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, intType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, floatType, intType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.MULT, floatType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, intType, intType, intType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, intType, floatType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, floatType, intType, floatType));
-            INSTANCE.compatSet.add(new BinaryOperatorCompat(TokenType.DIV, floatType, floatType, floatType));
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ADD, intType, intType), intType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ADD, intType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ADD, floatType, intType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ADD, floatType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.SUB, intType, intType), intType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.SUB, intType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.SUB, floatType, intType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.SUB, floatType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.MULT, intType, intType), intType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.MULT, intType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.MULT, floatType, intType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.MULT, floatType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, intType, intType), intType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, intType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, floatType, intType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, floatType, floatType), floatType);
 
             init = true;
         }
@@ -182,5 +185,25 @@ public class OperatorTable {
         boolean isOp1LToR = getAssociativity(id1);
         // Return 1 if the first operator is left-to-right, otherwise, return -1
         return isOp1LToR ? 1 : -1;
+    }
+
+    /**
+     * Maps an operator compatibility(OperatorCompat) object to a data type.
+     *
+     * @param opCompat       the object that stores operator compatibility.
+     * @param resultDataType the result's data type after applying the operator.
+     */
+    private void registerCompat(OperatorCompat opCompat, TypeInfo resultDataType) {
+        INSTANCE.compatMap.put(opCompat, resultDataType);
+    }
+
+    /**
+     * Gets the result's data type after applying operator to operands with two specific data types.
+     *
+     * @param opCompact the object that stores operator compatibility.
+     * @return the result's data type.
+     */
+    public TypeInfo getCompatDataType(OperatorCompat opCompact) {
+        return compatMap.get(opCompact);
     }
 }
