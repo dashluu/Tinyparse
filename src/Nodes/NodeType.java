@@ -1,5 +1,5 @@
 package Nodes;
 
 public enum NodeType {
-    TERMINAL, BINARY, UNARY, ASSIGNMENT, DECL
+    TERMINAL, BINARY_OP, UNARY_OP, ASSIGNMENT, DECL, TYPE_CONV
 }
