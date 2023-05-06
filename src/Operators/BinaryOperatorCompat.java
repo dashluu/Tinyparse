@@ -22,6 +22,12 @@ public class BinaryOperatorCompat extends OperatorCompat {
     }
 
     @Override
+    public int hashCode() {
+        String hashStr = id + leftDataType.getId() + rightDataType.getId();
+        return hashStr.hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!super.equals(obj) || !(obj instanceof BinaryOperatorCompat binaryOpTypeCompat)) {
             return false;

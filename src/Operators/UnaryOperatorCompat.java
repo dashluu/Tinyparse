@@ -16,6 +16,12 @@ public class UnaryOperatorCompat extends OperatorCompat {
     }
 
     @Override
+    public int hashCode() {
+        String hashStr = id + operandDataType.getId();
+        return hashStr.hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
         if (!super.equals(obj) || !(obj instanceof UnaryOperatorCompat unaryOpTypeCompat)) {
             return false;
