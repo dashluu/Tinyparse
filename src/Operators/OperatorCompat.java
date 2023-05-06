@@ -6,7 +6,7 @@ public abstract class OperatorCompat {
     protected final TokenType id;
     protected final OperatorCompatType compatType;
 
-    protected OperatorCompat(TokenType id, OperatorCompatType compatType) {
+    public OperatorCompat(TokenType id, OperatorCompatType compatType) {
         this.id = id;
         this.compatType = compatType;
     }
