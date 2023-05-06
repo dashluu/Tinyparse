@@ -11,10 +11,6 @@ public class DataTypeNode extends Node {
         this.dataType = dataType;
     }
 
-    public DataTypeNode(Token tok, NodeType type) {
-        this(tok, type, null);
-    }
-
     public TypeInfo getDataType() {
         return dataType;
     }
