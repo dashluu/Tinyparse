@@ -20,16 +20,18 @@ public class DeclParser extends BaseParser {
     }
 
     /**
-     * Parses a declaration statement in a scope.
+     * Parses a declaration statement and analyzes its semantics in a scope.
      *
      * @param scope the current scope surrounding the declaration.
      * @return an AST node as the root if successful, otherwise, return null.
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    public Node parseDecl(Block scope) throws SyntaxError, IOException {
+    public DataTypeNode parseDecl(Block scope) throws SyntaxError, IOException {
         DataTypeNode lhs = parseLhs(scope);
-        return parseAssignment(lhs, scope);
+        DataTypeNode root = parseAssignment(lhs, scope);
+        analyzeSemantics(root, scope);
+        return root;
     }
 
     /**
@@ -108,14 +110,15 @@ public class DeclParser extends BaseParser {
      * @throws SyntaxError if there is a syntax error.
      * @throws IOException if there is an IO exception.
      */
-    private Node parseAssignment(DataTypeNode lhs, Block scope) throws SyntaxError, IOException {
+    private DataTypeNode parseAssignment(DataTypeNode lhs, Block scope) throws SyntaxError, IOException {
         // Check for '='
         Token assignmentToken = parseTok(TokenType.ASSIGNMENT);
         if (assignmentToken == null) {
             if (lhs == null) {
-                // If there is no lhs, return immediately
-                return null;
+                // If there is no lhs, return expression only
+                return exprParser.parseExpr(scope);
             } else if (lhs.getDataType() == null) {
+                // This is for the case 'var id:type;'
                 // Check if the data type of lhs has been declared
                 // If not, throw an exception
                 throw new SyntaxError("Cannot determine the type of '" + lhs.getTok().getValue() + "'",
@@ -132,9 +135,56 @@ public class DeclParser extends BaseParser {
             throw new SyntaxError("Expected a nonempty expression after '='", lexer.getCurrLine());
         }
         // Construct a new tree whose root is '='
-        BinaryNode assignmentNode = new BinaryNode(assignmentToken, NodeType.ASSIGNMENT, null);
+        BinaryNode assignmentNode = new BinaryNode(assignmentToken, NodeType.DEF, null);
         assignmentNode.setLeft(lhs);
         assignmentNode.setRight(exprNode);
         return assignmentNode;
+    }
+
+    /**
+     * Analyzes the semantics of a declaration statement.
+     *
+     * @param root  the declaration's AST root.
+     * @param scope the current scope surrounding the declaration.
+     * @throws SyntaxError if there is a syntax error.
+     */
+    private void analyzeSemantics(DataTypeNode root, Block scope) throws SyntaxError {
+        if (root == null || root.getType() != NodeType.DEF) {
+            // If lhs is not a declaration, the statement must be an expression
+            return;
+        }
+
+        BinaryNode binaryRoot = (BinaryNode) root;
+        DataTypeNode lhs = binaryRoot.getLeft();
+        DataTypeNode exprRoot = binaryRoot.getRight();
+
+        // Compare and check if the lhs and rhs have the same data type
+        TypeInfo lhsDataType = lhs.getDataType();
+        TypeInfo rhsDataType = exprRoot.getDataType();
+
+        if (lhsDataType == null) {
+            if (rhsDataType == null) {
+                throw new SyntaxError("Cannot determine the type for the left-hand side", lexer.getCurrLine());
+            } else {
+                // If the lhs's data type is null, we assign rhs's data type directly to lhs
+                lhs.setDataType(rhsDataType);
+                // Set the variable or constant's data type in the symbol table
+                SymbolTable symbolTable = scope.getSymbolTable();
+                String id = lhs.getTok().getValue();
+                VarInfo varInfo = (VarInfo) symbolTable.getSymbol(id);
+                varInfo.setDataType(rhsDataType);
+            }
+        } else if (lhsDataType != rhsDataType) {
+            if (rhsDataType != null) {
+                // Assignment only works if lhs and rhs have the same data type unless type conversion is specified
+                throw new SyntaxError("Unable to assign a variable of type '" + lhsDataType.getId() +
+                        "' to data of type '" + rhsDataType.getId() + "'", lexer.getCurrLine());
+            } else {
+                throw new SyntaxError("No type detected on the right-hand side", lexer.getCurrLine());
+            }
+        }
+
+        // For debugging purposes
+        binaryRoot.setDataType(lhs.getDataType());
     }
 }
