@@ -43,6 +43,8 @@ public class OperatorTable {
             INSTANCE.opMap.put("=", TokenType.ASSIGNMENT);
             INSTANCE.opMap.put("(", TokenType.LPAREN);
             INSTANCE.opMap.put(")", TokenType.RPAREN);
+            INSTANCE.opMap.put("{", TokenType.LBRACKETS);
+            INSTANCE.opMap.put("}", TokenType.RBRACKETS);
             INSTANCE.opMap.put(";", TokenType.SEMICOLON);
 
             // Initialize prefix table
@@ -77,6 +79,7 @@ public class OperatorTable {
             TypeTable typeTable = TypeTable.getInstance();
             TypeInfo intType = typeTable.getType(TokenType.INT_LITERAL);
             TypeInfo floatType = typeTable.getType(TokenType.FLOAT_LITERAL);
+            TypeInfo boolType = typeTable.getType(TokenType.BOOL_LITERAL);
             // Unary operators
             INSTANCE.registerCompat(new UnaryOperatorCompat(TokenType.ADD, intType), intType);
             INSTANCE.registerCompat(new UnaryOperatorCompat(TokenType.ADD, floatType), floatType);
@@ -99,6 +102,11 @@ public class OperatorTable {
             INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, intType, floatType), floatType);
             INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, floatType, intType), floatType);
             INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.DIV, floatType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ASSIGNMENT, intType, intType), intType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ASSIGNMENT, intType, floatType), intType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ASSIGNMENT, floatType, intType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ASSIGNMENT, floatType, floatType), floatType);
+            INSTANCE.registerCompat(new BinaryOperatorCompat(TokenType.ASSIGNMENT, boolType, boolType), boolType);
 
             init = true;
         }
