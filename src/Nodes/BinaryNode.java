@@ -29,8 +29,8 @@ public class BinaryNode extends DataTypeNode {
 
     @Override
     public String toJson() {
-        return super.toJson() + "\",\n\"Children\": [\n{\n\"" +
-                left.toJson() + ",\n" +
-                right.toJson() + "\n]\n}\n";
+        return super.toJson() + ",\n\"Children\": [\n{\n" +
+                left.toJson() + "\n},\n{\n" +
+                right.toJson() + "\n}\n]";
     }
 }
