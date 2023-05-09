@@ -23,6 +23,6 @@ public class DataTypeNode extends Node {
     public String toJson() {
         return super.toJson() +
                 ",\n\"Data type\": \"" + dataType.getId() +
-                "\",\n\"Size\": " + dataType.getSize();
+                "\",\n\"Size\": \"" + dataType.getSize() + "\"";
     }
 }
