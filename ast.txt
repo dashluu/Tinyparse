@@ -1,0 +1,80 @@
+[
+{
+"Node type": "SCOPE",
+"Children": [
+{
+"Node type": "SCOPE",
+"Children": [
+{
+"Node type": "DEF",
+"Data type": "int",
+"Size": "4",
+"Children": [
+{
+"Node type": "DECL",
+"Data type": "int",
+"Size": "4",
+"Mutable": "true",
+"Id": "a"
+},
+{
+"Node type": "TERMINAL",
+"Data type": "int",
+"Size": "4"
+}
+]
+},{
+"Node type": "BINARY_OP",
+"Data type": "int",
+"Size": "4",
+"Children": [
+{
+"Node type": "TERMINAL",
+"Data type": "int",
+"Size": "4",
+"Mutable": "true",
+"Id": "a"
+},
+{
+"Node type": "TERMINAL",
+"Data type": "int",
+"Size": "4"
+}
+]
+},{
+"Node type": "TERMINAL",
+"Data type": "int",
+"Size": "4",
+"Mutable": "true",
+"Id": "a"
+},{
+"Node type": "DECL",
+"Data type": "bool",
+"Size": "1",
+"Mutable": "true",
+"Id": "b"
+},{
+"Node type": "BINARY_OP",
+"Data type": "bool",
+"Size": "1",
+"Children": [
+{
+"Node type": "TERMINAL",
+"Data type": "bool",
+"Size": "1",
+"Mutable": "true",
+"Id": "b"
+},
+{
+"Node type": "TERMINAL",
+"Data type": "bool",
+"Size": "1"
+}
+]
+},
+]
+},
+]
+},
+
+]
