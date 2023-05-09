@@ -3,6 +3,9 @@ package Parser;
 import Exceptions.SyntaxError;
 import Lexer.Lexer;
 import Nodes.*;
+import Operators.BinaryOperatorCompat;
+import Operators.OperatorCompat;
+import Operators.UnaryOperatorCompat;
 import Symbols.VarInfo;
 import Tokens.Token;
 import Tokens.TokenType;
@@ -19,7 +22,7 @@ public class ExprParser extends BaseParser {
     // Parse general expressions
 
     /**
-     * Parses an expression in a scope.
+     * Parses an expression and analyzes its semantics in a scope.
      *
      * @param scope the currently surrounding scope.
      * @return an AST node if an expression is parsed successfully, otherwise, null is returned.
@@ -30,6 +33,7 @@ public class ExprParser extends BaseParser {
         DataTypeNode root = parseExpr(scope, false);
         // Consume ';'
         parseTok(TokenType.SEMICOLON);
+        analyzeSemantics(root);
         return root;
     }
 
@@ -279,21 +283,56 @@ public class ExprParser extends BaseParser {
             opType = opTok.getType();
 
             if (opType == TokenType.EOF) {
-                if (inParen) {
-                    throw new SyntaxError("Missing ')'", lexer.getCurrLine());
+                if (prevOp != null) {
+                    if (currLeft == null) {
+                        // Missing an operand after an operator
+                        throw new SyntaxError("Expected an operand after '" + prevOp.getTok().getValue() + "'",
+                                lexer.getCurrLine());
+                    } else if (inParen) {
+                        // The expression ends without ')'
+                        throw new SyntaxError("Missing ')'", lexer.getCurrLine());
+                    } else {
+                        // An operand exists but the expression ends without ';'
+                        throw new SyntaxError("Missing ';'", lexer.getCurrLine());
+                    }
                 } else {
-                    throw new SyntaxError("Missing ';'", lexer.getCurrLine());
+                    if (currLeft == null) {
+                        // It can be an empty line or other type of statement
+                        return null;
+                    } else if (inParen) {
+                        // The expression ends without ')'
+                        throw new SyntaxError("Missing ')'", lexer.getCurrLine());
+                    } else {
+                        // An operand exists but the expression ends without ';'
+                        throw new SyntaxError("Missing ';'", lexer.getCurrLine());
+                    }
                 }
             }
 
             if (opType == TokenType.SEMICOLON) {
-                if (prevOp != null && currLeft == null) {
-                    // Throw an exception for the case operand operator ;
-                    throw new SyntaxError("Expected an operand after '" + prevOp.getTok().getValue() + "'",
-                            lexer.getCurrLine());
+                if (prevOp != null) {
+                    if (currLeft == null) {
+                        // Missing an operand after an operator
+                        throw new SyntaxError("Expected an operand after '" + prevOp.getTok().getValue() + "'",
+                                lexer.getCurrLine());
+                    } else if (inParen) {
+                        // The expression ends without ')'
+                        throw new SyntaxError("Missing ')'", lexer.getCurrLine());
+                    } else {
+                        // Deal with the case '... operator operand;'
+                        return currLeft;
+                    }
                 } else {
-                    // Deal with the cases: ; or operand;
-                    return currLeft;
+                    if (currLeft != null) {
+                        // Deal with the case 'operand;'
+                        return currLeft;
+                    } else if (inParen) {
+                        // The expression ends without ')'
+                        throw new SyntaxError("Missing ')'", lexer.getCurrLine());
+                    } else {
+                        // Return a node representing an empty statement(sentinel), or the case ';'
+                        return new DataTypeNode(null, NodeType.EMPTY, null);
+                    }
                 }
             }
 
@@ -309,7 +348,7 @@ public class ExprParser extends BaseParser {
             if (opTable.getId(opTok.getValue()) == null || !opTable.isInfix(opType)) {
                 if (currLeft == null) {
                     // Undetected operator with no preceding operand
-                    return currLeft;
+                    return null;
                 } else {
                     // If the next operator is neither valid nor infix and there is an operand, throw an exception
                     throw new SyntaxError("Expected an infix operator after '" + currLeft.getTok().getValue() + "'",
@@ -350,6 +389,70 @@ public class ExprParser extends BaseParser {
             newLeft.setLeft(currLeft);
             newLeft.setRight(right);
             currLeft = newLeft;
+        }
+    }
+
+    /**
+     * Analyzes the semantics of an expression.
+     *
+     * @param root the expression's AST root.
+     * @throws SyntaxError if there is a syntax error.
+     */
+    private void analyzeSemantics(DataTypeNode root) throws SyntaxError {
+        if (root == null || root.getType() == NodeType.TERMINAL || root.getType() == NodeType.EMPTY) {
+            return;
+        }
+
+        TypeInfo resultDataType;
+        Token op = root.getTok();
+        TokenType opId = op.getType();
+        OperatorCompat opCompat;
+
+        if (root.getType() == NodeType.UNARY_OP) {
+            UnaryNode unaryNode = (UnaryNode) root;
+            DataTypeNode childNode = unaryNode.getChild();
+
+            // Recursively analyze the semantics of the child node
+            analyzeSemantics(childNode);
+
+            // Get the operand's data type
+            TypeInfo operandDataType = childNode.getDataType();
+
+            // Check the result's data type after applying the operator
+            opCompat = new UnaryOperatorCompat(opId, operandDataType);
+            resultDataType = opTable.getCompatDataType(opCompat);
+            if (resultDataType == null) {
+                throw new SyntaxError("Operator '" + op.getValue() + "' is not compatible with type '" +
+                        operandDataType.getId() + "'", lexer.getCurrLine());
+            }
+
+            // Set the current node's data type to that of the result
+            unaryNode.setDataType(resultDataType);
+        } else {
+            // Expression root must be a node containing a binary operator
+            assert root instanceof BinaryNode;
+            BinaryNode binaryNode = (BinaryNode) root;
+            DataTypeNode leftNode = binaryNode.getLeft();
+            DataTypeNode rightNode = binaryNode.getRight();
+
+            // Recursively analyze the semantics of the left and right node
+            analyzeSemantics(leftNode);
+            analyzeSemantics(rightNode);
+
+            // Get the left and right node's data type
+            TypeInfo leftDataType = leftNode.getDataType();
+            TypeInfo rightDataType = rightNode.getDataType();
+
+            // Check the result's data type after applying the operator
+            opCompat = new BinaryOperatorCompat(opId, leftDataType, rightDataType);
+            resultDataType = opTable.getCompatDataType(opCompat);
+            if (resultDataType == null) {
+                throw new SyntaxError("Operator '" + op.getValue() + "' is not compatible with type '" +
+                        leftDataType.getId() + "' and type '" + rightDataType.getId() + "'", lexer.getCurrLine());
+            }
+
+            // Set the current node's data type to that of the result
+            binaryNode.setDataType(resultDataType);
         }
     }
 
