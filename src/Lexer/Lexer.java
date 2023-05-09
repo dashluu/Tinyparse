@@ -17,7 +17,7 @@ public class Lexer {
     private final OperatorTable opTable = OperatorTable.getInstance();
     private final KeywordTable kwTable = KeywordTable.getInstance();
     private final TypeTable typeTable = TypeTable.getInstance();
-    private final static String SPECIAL_CHARS = "()+-*/%~!&|<>=,.;:_";
+    private final static String SPECIAL_CHARS = "(){}+-*/%~!&|<>=,.;:_";
     private final static int EOS = -1;
     private int currLine = 1;
 
