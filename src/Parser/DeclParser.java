@@ -30,7 +30,7 @@ public class DeclParser extends BaseParser {
     public DataTypeNode parseDecl(Block scope) throws SyntaxError, IOException {
         DataTypeNode lhs = parseLhs(scope);
         DataTypeNode root = parseAssignment(lhs, scope);
-        analyzeSemantics(root, scope);
+        checkTypeCompat(root, scope);
         return root;
     }
 
@@ -142,13 +142,13 @@ public class DeclParser extends BaseParser {
     }
 
     /**
-     * Analyzes the semantics of a declaration statement.
+     * Checks type compatibility between left-hand side and right-hand side of the declaration.
      *
      * @param root  the declaration's AST root.
      * @param scope the current scope surrounding the declaration.
      * @throws SyntaxError if there is a syntax error.
      */
-    private void analyzeSemantics(DataTypeNode root, Block scope) throws SyntaxError {
+    private void checkTypeCompat(DataTypeNode root, Block scope) throws SyntaxError {
         if (root == null || root.getType() != NodeType.DEF) {
             // If lhs is not a declaration, the statement must be an expression
             return;
