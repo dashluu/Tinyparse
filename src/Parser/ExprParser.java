@@ -33,7 +33,7 @@ public class ExprParser extends BaseParser {
         DataTypeNode root = parseExpr(scope, false);
         // Consume ';'
         parseTok(TokenType.SEMICOLON);
-        analyzeSemantics(root);
+        checkTypeCompat(root);
         return root;
     }
 
@@ -393,12 +393,12 @@ public class ExprParser extends BaseParser {
     }
 
     /**
-     * Analyzes the semantics of an expression.
+     * Checks type compatibility between operands in the expression.
      *
      * @param root the expression's AST root.
      * @throws SyntaxError if there is a syntax error.
      */
-    private void analyzeSemantics(DataTypeNode root) throws SyntaxError {
+    private void checkTypeCompat(DataTypeNode root) throws SyntaxError {
         if (root == null || root.getType() == NodeType.TERMINAL || root.getType() == NodeType.EMPTY) {
             return;
         }
@@ -413,7 +413,7 @@ public class ExprParser extends BaseParser {
             DataTypeNode childNode = unaryNode.getChild();
 
             // Recursively analyze the semantics of the child node
-            analyzeSemantics(childNode);
+            checkTypeCompat(childNode);
 
             // Get the operand's data type
             TypeInfo operandDataType = childNode.getDataType();
@@ -436,8 +436,8 @@ public class ExprParser extends BaseParser {
             DataTypeNode rightNode = binaryNode.getRight();
 
             // Recursively analyze the semantics of the left and right node
-            analyzeSemantics(leftNode);
-            analyzeSemantics(rightNode);
+            checkTypeCompat(leftNode);
+            checkTypeCompat(rightNode);
 
             // Get the left and right node's data type
             TypeInfo leftDataType = leftNode.getDataType();
