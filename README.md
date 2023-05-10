@@ -71,14 +71,17 @@ The code for lexer is put in the package `Lexer` in the repository. It includes:
 
 * The code for the operator table is in the package `Operators`.
 * Similar to the keyword table, it is also handcoded.
-* It is a collection of tables that store operators and their properties: one for prefix operators, one for infix 
-operators, one for postfix operators, one for precedences, and one for associativities.
+* It is a collection of tables that store operators and their properties: one for prefix operators, one for infix
+  operators, one for postfix operators, one for precedences, one for associativities, and two for type compatibilities
+  between operands.
 
 ### Type table
 
 * The code for the type table is in the package `Types`.
 * Like other tables, it is handcoded.
-* It stores all built-in data types and their sizes.
+* There are two tables:
+    * One table maps strings as type IDs to objects that store type information.
+    * One table maps literals to objects that store type information.
 
 ### Symbol tables
 
@@ -92,7 +95,9 @@ operators, one for postfix operators, one for precedences, and one for associati
 
 #### Introduction and informal definitions
 
-* **Context-free grammar**: fill out details later.
+* **Context-free grammar**: a set of rules in the form `V -> r` where `V` is a variable, or non-terminal whereas `r` is
+  can be a non-terminal or terminal(another variable or literal).
+* **Grammar ambiguity**: a valid string produces two or more parse trees.
 * **Leftmost derivation**: fill out details later.
 * **Left recursion**: fill out details later.
 
@@ -102,7 +107,7 @@ For simplicity, our parser is a top-down parser with recursive descent and at mo
 to define the correct syntax for our parser. However, writing our own grammar from scratch is extremely difficult and
 time-consuming. To speed up the parser development, I decided to use some parts of existing languages' grammar (inspired
 mostly by Kotlin and Swift). From that, I made some changes to make it even simpler since I am not trying to build a
-full compiler!
+full compiler! In addition, I used Pratt parsing, operator precedences and associativity to prevent grammar ambiguity.
 
 #### Regex notations
 
@@ -112,18 +117,21 @@ from [Kotlin's grammar](https://kotlinlang.org/docs/reference/grammar.html).
 * `|`: alternative.
 * `*`: zero or more.
 * `+`: one or more.
-* `?`: zero or more
+* `?`: zero or one.
 
 #### Token grammar
 
-* **ID**: (`_` | (`a`-`z`) | (`A`-`Z`))(`_` | (`a`-`z`) | (`A`-`Z`) | (`0`-`9`))*
-* **Digits**: (`0`-`9`)+
-* **Number**: (`0`-`9`)+ | (`0`-`9`)\*`.`(`0`-`9`)\*
-* **Scientific number**: ((`0`-`9`)+ | (`0`-`9`)\*`.`(`0`-`9`)\*)(`.` `e` (`+` | `-`)?((`0`-`9`)+ | (`0`-`9`)\*`.`(`0`-`9`)\*))?
+```
+ID: ( _ | (a - z) | (A - Z))( _ | (a - z) | (A - Z) | (0 - 9))*
+Digits: (0 - 9)+
+Number: (0 - 9)+ | (0 - 9)*.(0 - 9)*
+Scientific number: ((0 - 9)+ | (0 - 9)*.(0 - 9)*)(.e(+ | -)?((0 - 9)+ | (0 - 9)*.(0 - 9)*))?
+```
 
 #### Expression grammar
 
-There are four types of expressions: primary, prefix, infix, and postfix. The following is the grammar for different
+There are four types of expressions: primary, prefix, infix, and postfix.<br>
+The following is the grammar for different
 parts of an expression, which terminates once `;` is encountered.
 
 ```
@@ -139,8 +147,40 @@ infix-expression -> prefix-expression infix-operator infix-expression
 
 ```
 declaration -> variable-declaration
-variable-declaration -> variable-declaration-head variable-name type-annotation initializer
-variable-declaration-head -> 'var'
+variable-declaration -> variable-declaration-head variable-name initializer-with-type
+initializer-with-type -> type-annotation initializer | type-annotation | initializer
+variable-declaration-head -> 'var' | 'let'
 type-annotation -> ':' type
-initializer -> '=' expression
+assignment-operator -> '='
+initializer -> assignment-operator expression
+```
+
+#### Statement grammar
+
+```
+statement -> declaration
+```
+
+#### Scope grammar
+
+Scope is defined to be a sequential collection of statements and blocks.
+
+```
+scope -> statement | block
+```
+
+#### Block grammar
+
+A block represents a block of code.
+
+```
+block -> '{' scope '}'
+```
+
+#### Source grammar
+
+A source represents the source code, or code from a given source(mostly a file).
+
+```
+src -> scope
 ```
